@@ -34,5 +34,13 @@ public:
 	Wall(int startX, int startY, StudentWorld* world);
 	virtual void doSomething(){}
 };
+class Boulder : public Actor
+{
+public:
+	Boulder(int startX, int startY, StudentWorld* world);
+	virtual void doSomething(){};
+private:
+	int m_hitPoints;
+};
 #endif 
 

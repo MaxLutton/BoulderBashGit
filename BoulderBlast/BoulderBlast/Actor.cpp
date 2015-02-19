@@ -16,6 +16,11 @@ Player::Player(int startX, int startY, StudentWorld* world) : Actor(IID_PLAYER, 
 	m_hitPoints = 20;
 }
 
+Boulder::Boulder(int startX, int startY, StudentWorld* world) : Actor(IID_BOULDER, startX, startY, none, world)
+{
+	m_hitPoints = 10;
+}
+
 void Player::doSomething()
 {
 	int x;

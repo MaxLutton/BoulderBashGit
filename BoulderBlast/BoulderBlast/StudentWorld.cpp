@@ -24,8 +24,10 @@ int StudentWorld::init()
 		int a = levelThings(lev, x, y);
 		if (a == 1) //player
 			m_player = new Player(x, y, this);
-		if (a == 2)
+		if (a == 2) //wall
 			m_actors.push_back(new Wall(x, y, this));
+		if (a == 3) //boulder
+			m_actors.push_back(new Boulder(x, y, this));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
