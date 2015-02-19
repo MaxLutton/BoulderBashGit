@@ -86,13 +86,9 @@ void StudentWorld::cleanUp()
 void StudentWorld::updateDisplayText()
 {
 /*Score: 0321000  Level : 05  Lives : 3  Health : 70 % Ammo : 20  Bonus : 742*/
-	string a = "Score: " + getScore();
-	string b = "  Level : " + getLevel();
-	string c = "  Lives : " + getLives();
-	string d = "  Health : " + m_player->getHealth();
-	string e = " % Ammo : " + m_player->getAmmo();
-	string f = "  Bonus : " + m_bonus;
-	setGameStatText(a + b + c + d + e + f);	
+	string text = "Score: " + to_string(getScore()) + "  Level : " + to_string(getLevel()) + "  Lives : " + to_string(getLives()) +
+		"  Health : " + to_string(m_player->getHealth()) + " % Ammo : " + to_string(m_player->getAmmo()) + "  Bonus : " + to_string(m_bonus);
+	setGameStatText(text);	
 }
 
 int StudentWorld::levelThings(unsigned int curLevel, int x, int y)
@@ -103,7 +99,7 @@ int StudentWorld::levelThings(unsigned int curLevel, int x, int y)
 	if (curLevel == 0)
 		a = "level00";
 	else if (curLevel < 10)
-		a = "level0" + curLevel;
+		a = "level0" + to_string(curLevel);
 	else
 		a = "level" + curLevel;
 	string theLevel = a + ".dat";
@@ -123,4 +119,18 @@ int StudentWorld::levelThings(unsigned int curLevel, int x, int y)
 		return 3;
 	else //will be for blank spaces later
 		return 0;
+}
+Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
+{
+	vector<Actor*>::iterator it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		int col = (*it)->getX();
+		int row = (*it)->getY();
+		if (col == x && row == y)
+			return *it;
+		else
+			it++;
+	}
+	return nullptr; //should never be used
 }

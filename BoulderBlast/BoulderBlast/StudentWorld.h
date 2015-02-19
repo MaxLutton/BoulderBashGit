@@ -27,6 +27,7 @@ public:
 	virtual void cleanUp();
 	int levelThings(unsigned int curLevel, int x, int y);
 	StudentWorld* getStudentWorld(){ return this; }
+	Actor* getActor(int x, int y); 
 	void updateDisplayText();
 
 private:

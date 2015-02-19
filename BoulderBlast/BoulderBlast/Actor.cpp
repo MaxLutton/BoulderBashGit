@@ -13,7 +13,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, Stud
 Player::Player(int startX, int startY, StudentWorld* world) : Actor(IID_PLAYER, startX, startY, right, world)
 {
 	m_ammo = 20;
-	m_hitPoints = 20;
+	m_hitPoints = 100;
 }
 
 Boulder::Boulder(int startX, int startY, StudentWorld* world) : Actor(IID_BOULDER, startX, startY, none, world)
@@ -30,18 +30,25 @@ void Player::doSomething()
 	unsigned int lev = world->getLevel();
 	if (world->getKey(x))
 	{
+		int l, r, d, u;
 		switch (x) //FILL IN! 
 		{
 		case KEY_PRESS_LEFT: 
 			setDirection(left); //need to check if direction is already left?
 			if (world->levelThings(lev, col - 1, row) == 0)
 				moveTo(col - 1, row);
-			
-			break;
+				break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
-			if (world->levelThings(lev, col + 1, row) == 0)
+			r = world->levelThings(lev, col + 1, row);
+			if (r == 0)
 				moveTo(col + 1, row);
+			if (r == 3)
+			{
+				Actor* rock = world->getActor(col + 1, row);
+				rock->moveTo(col + 2, row);
+				moveTo(col + 1, row);
+			}
 			break;
 		case KEY_PRESS_DOWN:
 			if (world->levelThings(lev, col, row - 1) == 0)
