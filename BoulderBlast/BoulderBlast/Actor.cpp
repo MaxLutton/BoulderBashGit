@@ -16,6 +16,8 @@ Player::Player(int startX, int startY, StudentWorld* world) : Actor(IID_PLAYER, 
 	m_hitPoints = 100;
 }
 
+Wall::Wall(int startX, int startY, StudentWorld* world) : Actor(IID_WALL, startX, startY, none, world){}
+
 Boulder::Boulder(int startX, int startY, StudentWorld* world) : Actor(IID_BOULDER, startX, startY, none, world)
 {
 	m_hitPoints = 10;
@@ -34,16 +36,17 @@ void Player::doSomething()
 		switch (x) //FILL IN! 
 		{
 		case KEY_PRESS_LEFT: 
-			setDirection(left); //need to check if direction is already left?
-			if (world->levelThings(lev, col - 1, row) == 0)
+			setDirection(left);
+			l = whatsThere(col - 1, row); 
+			if (l == 0)
 				moveTo(col - 1, row);
 				break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
-			r = world->levelThings(lev, col + 1, row);
+			r = whatsThere( col + 1, row);
 			if (r == 0)
 				moveTo(col + 1, row);
-			if (r == 3)
+			if (r == 2 && whatsThere(col + 2, row) == 0) //can push boulder
 			{
 				Actor* rock = world->getActor(col + 1, row);
 				rock->moveTo(col + 2, row);
@@ -51,11 +54,13 @@ void Player::doSomething()
 			}
 			break;
 		case KEY_PRESS_DOWN:
-			if (world->levelThings(lev, col, row - 1) == 0)
+			d = whatsThere(col, row - 1);
+			if (d == 0)
 				moveTo(col, row - 1);
 			break;
 		case KEY_PRESS_UP:
-			if (world->levelThings(lev, col, row + 1) == 0)
+			u = whatsThere(col, row + 1);
+			if (u == 0)
 				moveTo(col, row + 1);
 			break;
 		case KEY_PRESS_SPACE: //if ammo isnt 0, shoot
@@ -68,4 +73,17 @@ void Player::doSomething()
 	}
 
 }
-Wall::Wall(int startX, int startY, StudentWorld* world) : Actor(IID_WALL, startX, startY, none, world){}
+int Actor::whatsThere(int x, int y)
+{
+	Actor* ap = m_world->getActor(x, y);
+	if (ap != nullptr)
+	{
+		Wall* wp = dynamic_cast<Wall*>(ap);
+		if (wp != nullptr)
+			return 1;//wall
+		Boulder* bp = dynamic_cast<Boulder*>(ap);
+		if (bp != nullptr)
+			return 2; //boulder
+	}
+	return 0; //space :D
+}

@@ -21,7 +21,7 @@ int StudentWorld::init()
 	for (int x = 0; x < VIEW_WIDTH; x++)
 		for (int y = 0; y < VIEW_HEIGHT; y++)
 		{
-		int a = levelThings(lev, x, y);
+		int a = loadLevelObject(lev, x, y);
 		if (a == 1) //player
 			m_player = new Player(x, y, this);
 		if (a == 2) //wall
@@ -66,6 +66,8 @@ int StudentWorld::move()
 		else
 			it++;
 	}
+	if (m_bonus != 0)
+		m_bonus--;
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -77,6 +79,7 @@ void StudentWorld::cleanUp()
 	{
 		std::vector<Actor*>::iterator temp = it;
 		it--;
+		delete (*temp);
 		m_actors.erase(temp);
 		it++;
 	}
@@ -91,7 +94,7 @@ void StudentWorld::updateDisplayText()
 	setGameStatText(text);	
 }
 
-int StudentWorld::levelThings(unsigned int curLevel, int x, int y)
+int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 {
 
 		/*curLevel = "level03.dat";*/
