@@ -22,6 +22,23 @@ private:
 	bool m_isAlive;
 };
 
+class Wall : public Actor
+{
+public:
+	Wall(int startX, int startY, StudentWorld* world) : Actor(IID_WALL, startX, startY, none, world){}
+	virtual void doSomething(){}
+	virtual ~Wall(){}//empty virtual destructor
+};
+
+class Bullet : public Actor
+{
+public:
+	Bullet(int startX, int startY, Direction dir, StudentWorld* world);
+	virtual void doSomething();
+	virtual ~Bullet(){}
+	void moveBullet();
+};
+
 class healthyActor : public Actor
 {
 public:
@@ -44,13 +61,7 @@ public:
 private:
 	int m_ammo;
 };
-class Wall : public Actor
-{
-public:
-	Wall(int startX, int startY, StudentWorld* world) : Actor(IID_WALL, startX, startY, none, world){}
-	virtual void doSomething(){}
-	virtual ~Wall(){}//empty virtual destructor
-};
+
 class Boulder : public healthyActor
 {
 public:
@@ -59,13 +70,11 @@ public:
 	virtual ~Boulder(){}//empty virtual destructor
 };
 
-class Bullet : public Actor
+class Hole : public Actor
 {
 public:
-	Bullet(int startX, int startY, Direction dir, StudentWorld* world);
-	virtual void doSomething();
-	virtual ~Bullet(){}
-	void moveBullet();
+	Hole(int x, int y, StudentWorld* world) :Actor(IID_HOLE, x, y, none, world){}
+	virtual void doSomething(){}//holes cant do shit
 };
 #endif 
 

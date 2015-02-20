@@ -23,7 +23,9 @@ int Actor::whatsThere(int x, int y)
 		Boulder* bp = dynamic_cast<Boulder*>(ap);
 		if (bp != nullptr)
 			return 3; //boulder
-
+		Hole* hp = dynamic_cast<Hole*>(ap);
+		if (hp != nullptr)
+			return 4; //hole
 	}
 	return 0; //space or bullet :D
 }
@@ -44,50 +46,90 @@ void Player::doSomething()
 		int l, r, d, u;
 		switch (x) //try to do what the player wants
 		{
-		case KEY_PRESS_LEFT: 
+		case KEY_PRESS_LEFT:
 			setDirection(left);
-			l = whatsThere(col - 1, row); 
+			l = whatsThere(col - 1, row);
 			if (l == 0)
 				moveTo(col - 1, row);
-			if (l == 3 && whatsThere(col - 2, row) == 0)
+			if (l == 3)
 			{
 				Actor* rock = world->getActor(col - 1, row);
-				rock->moveTo(col - 2, row);
-				moveTo(col - 1, row);
+				if (whatsThere(col - 2, row) == 0)
+				{
+					rock->moveTo(col - 2, row);
+					moveTo(col - 1, row);
+				}
+				if (whatsThere(col - 2, row) == 4)
+				{
+					moveTo(col - 1, row);
+					Actor* missingDirt = world->getActor(col - 2, row);
+					missingDirt->setIsAlive(false);
+					rock->setIsAlive(false);
+				}
 			}
-				break;
+			break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
-			r = whatsThere( col + 1, row);
+			r = whatsThere(col + 1, row);
 			if (r == 0)
 				moveTo(col + 1, row);
-			if (r == 3 && whatsThere(col + 2, row) == 0) //can push boulder
+			if (r == 3)  //can push boulder
 			{
 				Actor* rock = world->getActor(col + 1, row);
-				rock->moveTo(col + 2, row);
-				moveTo(col + 1, row);
+				if (whatsThere(col + 2, row) == 0)
+				{
+					rock->moveTo(col + 2, row);
+					moveTo(col + 1, row);
+				}
+				if (whatsThere(col + 2, row) == 4)//push rock into hole
+				{
+					Actor* missingDirt = world->getActor(col + 2, row);
+					missingDirt->setIsAlive(false);
+					rock->setIsAlive(false);
+					moveTo(col + 1, row);
+				}
 			}
 			break;
 		case KEY_PRESS_DOWN:
 			d = whatsThere(col, row - 1);
 			if (d == 0)
 				moveTo(col, row - 1);
-			if (d == 3 && whatsThere(col, row - 2) == 0)
+			if (d == 3)
 			{
 				Actor* rock = world->getActor(col, row - 1);
-				rock->moveTo(col, row - 2);
-				moveTo(col, row - 1);
-			}		
+				if (whatsThere(col, row - 2) == 0)//pushing boulder to empty
+				{
+					rock->moveTo(col, row - 2);
+					moveTo(col, row - 1);
+				}
+				if (whatsThere(col, row - 2) == 4)//pushing boulder into hole
+				{
+					Actor* missingDirt = world->getActor(col, row - 2);
+					missingDirt->setIsAlive(false);
+					rock->setIsAlive(false);
+					moveTo(col, row - 1);
+				}
+			}
 			break;
 		case KEY_PRESS_UP:
 			u = whatsThere(col, row + 1);
 			if (u == 0)
 				moveTo(col, row + 1);
-			if (u == 3 && whatsThere(col, row + 2) == 0)
+			if (u == 3)
 			{
 				Actor* rock = world->getActor(col, row + 1);
-				rock->moveTo(col, row + 2);
-				moveTo(col, row + 1);
+				if (whatsThere(col, row + 2) == 0) //pushing boulder to empty space
+				{
+					rock->moveTo(col, row + 2);
+					moveTo(col, row + 1);//move player
+				}
+				if (whatsThere(col, row + 2) == 4)//pushing boulder into hole
+				{
+					Actor* missingDirt = world->getActor(col, row + 2);
+					missingDirt->setIsAlive(false);
+					rock->setIsAlive(false);
+					moveTo(col, row + 1);//move player
+				}
 			}
 			break;
 		case KEY_PRESS_SPACE: //if ammo isnt 0, shoot
@@ -95,15 +137,16 @@ void Player::doSomething()
 			{
 				getWorld()->getm_Actors()->push_back(new Bullet(col, row, getDirection(), getWorld()));
 				m_ammo--;
+				world->playSound(SOUND_PLAYER_FIRE);
 			}
-			break; 
+			break;
 		case KEY_PRESS_ESCAPE: //make dead
 			setIsAlive(false);
 			break;
 		}
 	}
-
 }
+
 
 
 Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Actor(IID_BULLET, startX, startY, dir, world){}
@@ -115,7 +158,7 @@ void Bullet::doSomething()
 	int row = getY();
 	int here = whatsThere(col, row);
 	int next;
-	if (here == 0) //starts on free space
+	if (here == 0 || here == 4) //starts on free space (or bullet) or hole
 		moveBullet();
 	if (here == 1 || here == 3) //boulder or player
 	{
@@ -163,3 +206,4 @@ void Bullet::moveBullet()
 		break;
 	}
 }
+
