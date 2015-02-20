@@ -24,6 +24,7 @@ public:
 	virtual void cleanUp();
 	int loadLevelObject(unsigned int curLevel, int x, int y);
 	StudentWorld* getStudentWorld(){ return this; }
+	std::vector<Actor*>* getm_Actors(); //returns pointer to m_Actors
 	Actor* getActor(int x, int y); 
 	void updateDisplayText();
 

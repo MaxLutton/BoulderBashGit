@@ -98,7 +98,9 @@ void StudentWorld::updateDisplayText()
 	oss << " Level: " << setw(2) << getLevel();
 	oss.fill(' ');
 	oss << " Lives: " << setw(2) << getLives();
-	oss << " Health: " << setw(3) << (m_player->getHealth() / 20) * 100 << "%";
+	int health = (m_player->getHealth()) / 20;
+	health = health * 100;
+	oss << " Health: " << setw(3) << health << "%";
 	oss << " Ammo: " << setw(3) << m_player->getAmmo();
 	oss << " Bonus: " << setw(4) << m_bonus;
 	setGameStatText(oss.str());
@@ -147,4 +149,9 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 			it++;
 	}
 	return nullptr; //should never be used
+}
+std::vector<Actor*>* StudentWorld::getm_Actors()
+{ 
+	std::vector<Actor*>* point = &m_actors;
+	return point;
 }
