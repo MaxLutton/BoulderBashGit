@@ -2,6 +2,8 @@
 #include "Actor.h"
 #include "Level.h"
 #include <string>
+#include <sstream>
+#include <iomanip>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -60,6 +62,7 @@ int StudentWorld::move()
 		{
 			std::vector<Actor*>::iterator temp = it;
 			it--;
+			delete *temp;
 			m_actors.erase(temp);
 			it++;
 		}
@@ -77,11 +80,8 @@ void StudentWorld::cleanUp()
 	it = m_actors.begin();
 	while (it != m_actors.end())
 	{
-		std::vector<Actor*>::iterator temp = it;
-		it--;
-		delete (*temp);
-		m_actors.erase(temp);
-		it++;
+		delete (*it);
+		it = m_actors.erase(it);
 	}
 	delete m_player;
 }
@@ -89,9 +89,20 @@ void StudentWorld::cleanUp()
 void StudentWorld::updateDisplayText()
 {
 /*Score: 0321000  Level : 05  Lives : 3  Health : 70 % Ammo : 20  Bonus : 742*/
-	string text = "Score: " + to_string(getScore()) + "  Level : " + to_string(getLevel()) + "  Lives : " + to_string(getLives()) +
-		"  Health : " + to_string(m_player->getHealth()) + " % Ammo : " + to_string(m_player->getAmmo()) + "  Bonus : " + to_string(m_bonus);
-	setGameStatText(text);	
+	//string text = "Score: " + to_string(getScore()) + "  Level : " + to_string(getLevel()) + "  Lives : " + to_string(getLives()) +
+	//	"  Health : " + to_string(m_player->getHealth()) + " % Ammo : " + to_string(m_player->getAmmo()) + "  Bonus : " + to_string(m_bonus);
+	//setGameStatText(text);	
+	ostringstream oss;
+	oss.fill('0');
+	oss << "Score: " << setw(7) << getScore();
+	oss << " Level: " << setw(2) << getLevel();
+	oss.fill(' ');
+	oss << " Lives: " << setw(2) << getLives();
+	oss << " Health: " << setw(3) << (m_player->getHealth() / 20) * 100 << "%";
+	oss << " Ammo: " << setw(3) << m_player->getAmmo();
+	oss << " Bonus: " << setw(4) << m_bonus;
+	setGameStatText(oss.str());
+	
 }
 
 int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)

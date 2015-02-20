@@ -13,7 +13,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, Stud
 Player::Player(int startX, int startY, StudentWorld* world) : Actor(IID_PLAYER, startX, startY, right, world)
 {
 	m_ammo = 20;
-	m_hitPoints = 100;
+	m_hitPoints = 20;
 }
 
 Wall::Wall(int startX, int startY, StudentWorld* world) : Actor(IID_WALL, startX, startY, none, world){}
@@ -33,13 +33,19 @@ void Player::doSomething()
 	if (world->getKey(x))
 	{
 		int l, r, d, u;
-		switch (x) //FILL IN! 
+		switch (x) //try to do what the player wants
 		{
 		case KEY_PRESS_LEFT: 
 			setDirection(left);
 			l = whatsThere(col - 1, row); 
 			if (l == 0)
 				moveTo(col - 1, row);
+			if (l == 2 && whatsThere(col - 2, row) == 0)
+			{
+				Actor* rock = world->getActor(col - 1, row);
+				rock->moveTo(col - 2, row);
+				moveTo(col - 1, row);
+			}
 				break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
@@ -57,13 +63,26 @@ void Player::doSomething()
 			d = whatsThere(col, row - 1);
 			if (d == 0)
 				moveTo(col, row - 1);
+			if (d == 2 && whatsThere(col, row - 2) == 0)
+			{
+				Actor* rock = world->getActor(col, row - 1);
+				rock->moveTo(col, row - 2);
+				moveTo(col, row - 1);
+			}		
 			break;
 		case KEY_PRESS_UP:
 			u = whatsThere(col, row + 1);
 			if (u == 0)
 				moveTo(col, row + 1);
+			if (u == 2 && whatsThere(col, row + 2) == 0)
+			{
+				Actor* rock = world->getActor(col, row + 1);
+				rock->moveTo(col, row + 2);
+				moveTo(col, row + 1);
+			}
 			break;
 		case KEY_PRESS_SPACE: //if ammo isnt 0, shoot
+			break; 
 		case KEY_PRESS_ESCAPE:
 			setIsAlive(false);
 			//make dead
