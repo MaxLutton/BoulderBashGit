@@ -91,6 +91,7 @@ void Player::doSomething()
 			}
 			break;
 		case KEY_PRESS_DOWN:
+			setDirection(down);
 			d = whatsThere(col, row - 1);
 			if (d == 0)
 				moveTo(col, row - 1);
@@ -112,6 +113,7 @@ void Player::doSomething()
 			}
 			break;
 		case KEY_PRESS_UP:
+			setDirection(up);
 			u = whatsThere(col, row + 1);
 			if (u == 0)
 				moveTo(col, row + 1);
@@ -199,6 +201,34 @@ void Bullet::moveBullet()
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col + 1, row);
+			guy->decHealth();
+			if (guy->getHealth() == 0) //just shot it dead
+				guy->setIsAlive(false);
+		}
+		break;
+	case up:
+		next = whatsThere(col, row + 1);
+		moveTo(col, row + 1);
+		if (next == 2)
+			setIsAlive(false);
+		if (next == 1 || next == 3)
+		{
+			setIsAlive(false);
+			Actor* guy = getWorld()->getActor(col, row+1);
+			guy->decHealth();
+			if (guy->getHealth() == 0) //just shot it dead
+				guy->setIsAlive(false);
+		}
+		break;
+	case down:
+		next = whatsThere(col, row -1);
+		moveTo(col, row - 1);
+		if (next == 2)
+			setIsAlive(false);
+		if (next == 1 || next == 3)
+		{
+			setIsAlive(false);
+			Actor* guy = getWorld()->getActor(col, row - 1);
 			guy->decHealth();
 			if (guy->getHealth() == 0) //just shot it dead
 				guy->setIsAlive(false);
