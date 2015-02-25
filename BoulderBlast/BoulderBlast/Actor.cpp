@@ -259,3 +259,22 @@ Exit::Exit(int x, int y, StudentWorld* world) : Actor(IID_EXIT, x, y, none, worl
 	setVisible(false);
 }
 
+void Exit::doSomething()
+{
+	int x = getX();
+	int y = getY();
+	StudentWorld* w = getWorld();
+	//all jewels have been grabbed
+	if (!w->jewelsLeft())
+	{
+		setVisible(true);
+		int px = w->getPlayer()->getX();
+		int py = w->getPlayer()->getY();
+		if (px == x && py == y)
+		{
+			w->increaseScore(2000 + w->getBonus());
+			w->playSound(SOUND_FINISHED_LEVEL);
+			setIsAlive(false);
+		}
+	}
+}

@@ -88,7 +88,7 @@ class Exit :public Actor
 {
 public:
 	Exit(int x, int y, StudentWorld* world);
-	virtual void doSomething(){}
+	virtual void doSomething();
 };
 #endif 
 

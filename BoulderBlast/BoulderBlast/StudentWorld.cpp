@@ -171,9 +171,7 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		int col = (*it)->getX();
 		int row = (*it)->getY();
 		if (col == x && row == y)
-		{
 			return *it;
-		}
 		else
 			it++;
 	}
