@@ -253,3 +253,9 @@ void Jewel::doSomething()
 		setIsAlive(false);
 	}
 }
+
+Exit::Exit(int x, int y, StudentWorld* world) : Actor(IID_EXIT, x, y, none, world)
+{
+	setVisible(false);
+}
+

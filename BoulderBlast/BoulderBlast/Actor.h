@@ -83,5 +83,12 @@ public:
 	Jewel(int x, int y, StudentWorld* world) :Actor(IID_JEWEL, x, y, none, world){}
 	virtual void doSomething();
 };
+
+class Exit :public Actor
+{
+public:
+	Exit(int x, int y, StudentWorld* world);
+	virtual void doSomething(){}
+};
 #endif 
 

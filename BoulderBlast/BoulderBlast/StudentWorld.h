@@ -28,6 +28,7 @@ public:
 	std::vector<Actor*>* getm_Actors(); //returns pointer to m_Actors
 	Player* getPlayer(); //returns pointer to m_player
 	Actor* getActor(int x, int y); 
+	int getBonus();
 	void updateDisplayText();
 	void decrJewels(); //decriments m_nJewels by one
 	bool jewelsLeft(){ return m_nJewels > 0; } //returns if there are still jewels to be had
@@ -42,6 +43,10 @@ private:
 inline Player* StudentWorld::getPlayer()
 { 
 	return m_player; 
+}
+inline int StudentWorld::getBonus()
+{
+	return m_bonus;
 }
 
 #endif // STUDENTWORLD_H_

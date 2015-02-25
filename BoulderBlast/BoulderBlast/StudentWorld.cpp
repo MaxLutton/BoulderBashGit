@@ -49,6 +49,8 @@ int StudentWorld::init()
 			m_actors.push_back(new Jewel(x, y, this));
 			m_nJewels++;
 		}
+		if (a == 6)// exit
+			m_actors.push_back(new Exit(x, y, this));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
@@ -156,6 +158,8 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 		return 4;
 	if (item == Level::jewel)
 		return 5;
+	if (item == Level::exit)
+		return 6;
 	else //will be for blank spaces later
 		return 0;
 }
@@ -168,7 +172,7 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		int row = (*it)->getY();
 		if (col == x && row == y)
 		{
-			it++; 
+			return *it;
 		}
 		else
 			it++;
