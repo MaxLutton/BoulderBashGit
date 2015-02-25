@@ -16,6 +16,7 @@ class StudentWorld : public GameWorld
 public:
 	StudentWorld(std::string assetDir)
 		: GameWorld(assetDir), m_bonus(1000), m_actors(), m_player(nullptr)	{}
+	virtual ~StudentWorld();
 
 	virtual int init();
 

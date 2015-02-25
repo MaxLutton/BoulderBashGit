@@ -14,6 +14,17 @@ GameWorld* createStudentWorld(string assetDir)
 #include "StudentWorld.h"
 //#include "Levels.h"
 
+StudentWorld::~StudentWorld()
+{
+	delete m_player;
+	std::vector<Actor*>::iterator it;
+	it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		delete (*it);
+		it = m_actors.erase(it);
+	}
+}
 
 int StudentWorld::init()
 {
