@@ -237,3 +237,19 @@ void Bullet::moveBullet()
 	}
 }
 
+
+void Jewel::doSomething()
+{
+	int x = getX();
+	int y = getY();
+	int px = getWorld()->getPlayer()->getX();
+	int py = getWorld()->getPlayer()->getY();
+	//player on jewel, so give points, play sound, decrement m_nJewels member, and set this jewel to dead
+	if (x== px && y == py)
+	{
+		getWorld()->increaseScore(50);
+		getWorld()->playSound(SOUND_GOT_GOODIE);
+		getWorld()->decrJewels();
+		setIsAlive(false);
+	}
+}

@@ -45,7 +45,10 @@ int StudentWorld::init()
 		if (a == 4)//hole
 			m_actors.push_back(new Hole(x, y, this));
 		if (a == 5)//jewel
+		{
 			m_actors.push_back(new Jewel(x, y, this));
+			m_nJewels++;
+		}
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
@@ -164,14 +167,20 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		int col = (*it)->getX();
 		int row = (*it)->getY();
 		if (col == x && row == y)
-			return *it;
+		{
+			it++; 
+		}
 		else
 			it++;
 	}
-	return nullptr; //should never be used
+	return nullptr; 
 }
 std::vector<Actor*>* StudentWorld::getm_Actors()
 { 
 	std::vector<Actor*>* point = &m_actors;
 	return point;
+}
+void StudentWorld::decrJewels()
+{
+	m_nJewels--;
 }

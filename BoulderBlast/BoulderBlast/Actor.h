@@ -81,7 +81,7 @@ class Jewel : public Actor
 {
 public:
 	Jewel(int x, int y, StudentWorld* world) :Actor(IID_JEWEL, x, y, none, world){}
-	virtual void doSomething(){}//nada tostada
+	virtual void doSomething();
 };
 #endif 
 
