@@ -14,8 +14,8 @@ class Player;
 class StudentWorld : public GameWorld
 {
 public:
-	StudentWorld(std::string assetDir)
-		: GameWorld(assetDir), m_bonus(1000), m_actors(), m_player(nullptr)	{}
+	StudentWorld(std::string assetDir);
+
 	virtual ~StudentWorld();
 
 	virtual int init();
@@ -32,12 +32,14 @@ public:
 	void updateDisplayText();
 	void decrJewels(); //decriments m_nJewels by one
 	bool jewelsLeft(){ return m_nJewels > 0; } //returns if there are still jewels to be had
+	void setLevelCompleted(bool to);
 
 private:
 	std::vector<Actor*> m_actors;
 	Player* m_player;
 	int m_bonus;
 	int m_nJewels; //stores number of jewels left in level
+	bool m_levelCompleted;
 };
 
 inline Player* StudentWorld::getPlayer()
@@ -47,6 +49,11 @@ inline Player* StudentWorld::getPlayer()
 inline int StudentWorld::getBonus()
 {
 	return m_bonus;
+}
+
+inline void StudentWorld::setLevelCompleted(bool to)
+{
+	m_levelCompleted = to;
 }
 
 #endif // STUDENTWORLD_H_

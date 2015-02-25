@@ -14,6 +14,8 @@ GameWorld* createStudentWorld(string assetDir)
 #include "StudentWorld.h"
 //#include "Levels.h"
 
+StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir), m_bonus(1000), m_actors(), m_player(nullptr), m_levelCompleted(false)	{}
+
 StudentWorld::~StudentWorld()
 {
 	delete m_player;
@@ -89,6 +91,11 @@ int StudentWorld::move()
 		}
 		else
 			it++;
+	}
+	if (m_levelCompleted)
+	{
+		m_levelCompleted = false;
+		return GWSTATUS_FINISHED_LEVEL;
 	}
 	if (m_bonus != 0)
 		m_bonus--;
@@ -171,7 +178,13 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		int col = (*it)->getX();
 		int row = (*it)->getY();
 		if (col == x && row == y)
-			return *it;
+		{	
+			Jewel* jp = dynamic_cast<Jewel*>(*it);
+			Exit* xp = dynamic_cast<Exit*>(*it);
+			if (jp == nullptr && xp == nullptr)
+				return *it; //not the jewel or exit
+			it++; ///was a jewel or exit
+		}
 		else
 			it++;
 	}

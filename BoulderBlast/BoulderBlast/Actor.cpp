@@ -14,6 +14,7 @@ int Actor::whatsThere(int x, int y)
 	Actor* ap = m_world->getActor(x, y);
 	if (ap != nullptr)
 	{
+		//not necessary (remove later)
 		Player* pp = dynamic_cast<Player*>(ap);
 		if (pp != nullptr)
 			return 1; //player
@@ -274,6 +275,7 @@ void Exit::doSomething()
 		{
 			w->increaseScore(2000 + w->getBonus());
 			w->playSound(SOUND_FINISHED_LEVEL);
+			w->setLevelCompleted(true);
 			setIsAlive(false);
 		}
 	}
