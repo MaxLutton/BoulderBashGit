@@ -76,5 +76,12 @@ public:
 	Hole(int x, int y, StudentWorld* world) :Actor(IID_HOLE, x, y, none, world){}
 	virtual void doSomething(){}//holes cant do shit
 };
+
+class Jewel : public Actor
+{
+public:
+	Jewel(int x, int y, StudentWorld* world) :Actor(IID_JEWEL, x, y, none, world){}
+	virtual void doSomething(){}//nada tostada
+};
 #endif 
 

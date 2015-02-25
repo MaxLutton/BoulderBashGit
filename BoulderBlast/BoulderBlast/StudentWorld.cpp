@@ -24,6 +24,7 @@ StudentWorld::~StudentWorld()
 		delete (*it);
 		it = m_actors.erase(it);
 	}
+
 }
 
 int StudentWorld::init()
@@ -43,6 +44,8 @@ int StudentWorld::init()
 			m_actors.push_back(new Boulder(x, y, this));
 		if (a == 4)//hole
 			m_actors.push_back(new Hole(x, y, this));
+		if (a == 5)//jewel
+			m_actors.push_back(new Jewel(x, y, this));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
@@ -148,6 +151,8 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 		return 3;
 	if (item == Level::hole)
 		return 4;
+	if (item == Level::jewel)
+		return 5;
 	else //will be for blank spaces later
 		return 0;
 }
