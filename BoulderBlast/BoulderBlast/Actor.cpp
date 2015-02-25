@@ -34,6 +34,7 @@ int Actor::whatsThere(int x, int y)
 Player::Player(int startX, int startY, StudentWorld* world) : healthyActor(IID_PLAYER, startX, startY, right, world, 20)
 {
 	m_ammo = 20;
+
 }
 
 void Player::doSomething()

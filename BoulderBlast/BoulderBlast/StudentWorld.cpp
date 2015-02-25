@@ -34,6 +34,7 @@ int StudentWorld::init()
 	//push actors from gameworld into vector
 	//load level file
 	unsigned int lev = getLevel();
+	m_bonus = 1000; //set bonus every time level loads
 	for (int x = 0; x < VIEW_WIDTH; x++)
 		for (int y = 0; y < VIEW_HEIGHT; y++)
 		{
