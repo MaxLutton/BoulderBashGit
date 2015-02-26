@@ -210,7 +210,7 @@ void Bullet::moveBullet()
 		moveTo(col - 1, row);
 		if (next == 2) //ran into wall
 			setIsAlive(false);
-		if (next == 1 || next == 3 || next == 5) //hit a player or a boulder
+		if (next == 1 || next == 3 || next == 5) //hit a player or a boulder or bot
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col - 1, row);
@@ -316,6 +316,32 @@ bool PickupableItem::IsPlayerOnMe(StudentWorld* world)
 	return (x == px && y == py);
 }
 
+void Goodie::doSomething()
+{
+	//kleptobot is on goodie
+		if (whatsThere(getX(), getY()) == 5)
+		{
+			//one in ten chance of grabbing goodie
+			int r = rand() % 10;
+			if (r == 2)
+			{
+				std::string type;
+				ExtraLifeGoodie* ep = dynamic_cast<ExtraLifeGoodie*>(this);
+				if (ep != nullptr)
+					type = "life";
+				RestoreHealthGoodie* rp = dynamic_cast<RestoreHealthGoodie*>(this);
+				if (rp != nullptr)
+					type = "health";
+				AmmoGoodie* ap = dynamic_cast<AmmoGoodie*>(this);
+				if (ap != nullptr)
+					type = "ammo";
+				getWorld()->getActor(getX(), getY())->setHasGoodie(type);
+				setIsAlive(false);
+				getWorld()->playSound(SOUND_ROBOT_MUNCH);
+			}
+	}
+}
+
 void ExtraLifeGoodie::doSomething()
 {
 	StudentWorld* world = getWorld();
@@ -326,6 +352,8 @@ void ExtraLifeGoodie::doSomething()
 		setIsAlive(false);
 		world->incLives();
 	}
+	else
+		Goodie::doSomething();
 }
 
 void RestoreHealthGoodie::doSomething()
@@ -337,8 +365,9 @@ void RestoreHealthGoodie::doSomething()
 		world->playSound(SOUND_GOT_GOODIE);
 		setIsAlive(false);
 		world->getPlayer()->RestoreHealth();
-		
 	}
+	else
+		Goodie::doSomething();
 }
 
 void AmmoGoodie::doSomething()
@@ -351,6 +380,8 @@ void AmmoGoodie::doSomething()
 		setIsAlive(false);
 		world->getPlayer()->incrAmmo();
 	}
+	else
+		Goodie::doSomething();
 }
 
 bool Robot::sameCoordAsPlayer(int x, int y)
@@ -428,6 +459,19 @@ KleptoBot::KleptoBot(int x, int y, StudentWorld* world) : Robot(x, y, right, wor
 	distanceBeforeTurning = rand() % 7 + 1;
 
 }
+KleptoBot::~KleptoBot()
+{
+	if (hasGoodie)
+	{
+		if (typeOfGoodie == "life")
+			getWorld()->getm_Actors()->push_back(new ExtraLifeGoodie(getX(), getY(), getWorld()));
+		if (typeOfGoodie == "health")
+			getWorld()->getm_Actors()->push_back(new RestoreHealthGoodie(getX(), getY(), getWorld()));
+		if (typeOfGoodie == "ammo")
+			getWorld()->getm_Actors()->push_back(new AmmoGoodie(getX(), getY(), getWorld()));
+	}
+}
+
 GraphObject::Direction getRandomDirection()
 {
 	int r = rand() % 4;
@@ -559,8 +603,9 @@ void KleptoBot::decHealth()
 	}
 }
 
-void KleptoBot::setHasGoodie()
+void KleptoBot::setHasGoodie(std::string type)
 {
 	hasGoodie = true;
+	typeOfGoodie = type;
 }
 
