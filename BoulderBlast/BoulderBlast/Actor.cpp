@@ -31,6 +31,11 @@ int Actor::whatsThere(int x, int y)
 	return 0; //space or bullet :D
 }
 
+void healthyActor::RestoreHealth()
+{
+	m_hitPoints = 20;
+}
+
 Player::Player(int startX, int startY, StudentWorld* world) : healthyActor(IID_PLAYER, startX, startY, right, world, 20)
 {
 	m_ammo = 20;
@@ -295,5 +300,22 @@ void ExtraLifeGoodie::doSomething()
 		world->playSound(SOUND_GOT_GOODIE);
 		setIsAlive(false);
 		world->incLives();
+	}
+}
+
+void RestoreHealthGoodie::doSomething()
+{
+	StudentWorld* world = getWorld();
+	int x = getX();
+	int y = getY();
+	int px = world->getPlayer()->getX();
+	int py = world->getPlayer()->getY();
+	if (x == px && y == py)
+	{
+		world->increaseScore(500);
+		world->playSound(SOUND_GOT_GOODIE);
+		setIsAlive(false);
+		world->getPlayer()->RestoreHealth();
+		
 	}
 }

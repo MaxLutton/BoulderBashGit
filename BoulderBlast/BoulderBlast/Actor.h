@@ -47,6 +47,7 @@ public:
 	int getHealth(){ return m_hitPoints; }
 	void decHealth(){ m_hitPoints -= 2; }
 	virtual ~healthyActor(){}
+	void RestoreHealth();
 private:
 	int m_hitPoints;
 };
@@ -103,11 +104,19 @@ public:
 	virtual void doSomething();
 };
 
+class RestoreHealthGoodie : public Goodie
+{
+public:
+	RestoreHealthGoodie(int x, int y, StudentWorld* world) : Goodie(x, y, world, IID_RESTORE_HEALTH){}
+	virtual void doSomething();
+};
+
 class Exit :public Actor
 {
 public:
 	Exit(int x, int y, StudentWorld* world);
 	virtual void doSomething();
 };
+
 #endif 
 
