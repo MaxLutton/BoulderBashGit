@@ -210,12 +210,12 @@ void Bullet::moveBullet()
 		moveTo(col - 1, row);
 		if (next == 2) //ran into wall
 			setIsAlive(false);
-		if (next == 1 || next == 3) //hit a player or a boulder
+		if (next == 1 || next == 3 || next == 5) //hit a player or a boulder
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col - 1, row);
 			guy->decHealth(); //bang bang you're dead
-			if (guy->getHealth() == 0)
+			if (guy->getHealth() <= 0)
 				guy->setIsAlive(false);
 		}
 			break;
@@ -224,7 +224,7 @@ void Bullet::moveBullet()
 		moveTo(col + 1, row);
 		if (next == 2)
 			setIsAlive(false);
-		if (next == 1 || next == 3)
+		if (next == 1 || next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col + 1, row);
@@ -238,7 +238,7 @@ void Bullet::moveBullet()
 		moveTo(col, row + 1);
 		if (next == 2)
 			setIsAlive(false);
-		if (next == 1 || next == 3)
+		if (next == 1 || next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row+1);
@@ -252,7 +252,7 @@ void Bullet::moveBullet()
 		moveTo(col, row - 1);
 		if (next == 2)
 			setIsAlive(false);
-		if (next == 1 || next == 3)
+		if (next == 1 || next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row - 1);
@@ -543,6 +543,20 @@ bool KleptoBot::moveKlepto()
 		break;
 	}
 	return true;
+}
+
+void KleptoBot::decHealth()
+{
+	StudentWorld* world = getWorld();
+	healthyActor::decHealth();
+	if (getHealth() > 0)
+		world->playSound(SOUND_ROBOT_IMPACT);
+	if (getHealth() <= 0)
+	{
+		world->playSound(SOUND_ROBOT_DIE);
+		world->increaseScore(10);
+		setIsAlive(false);
+	}
 }
 
 void KleptoBot::setHasGoodie()

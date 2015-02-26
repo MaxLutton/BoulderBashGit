@@ -45,7 +45,7 @@ public:
 	healthyActor(int imageID, int startX, int startY, Direction dir, StudentWorld* world, int hitpoints) : Actor(imageID, startX, startY, dir, world){ m_hitPoints = hitpoints; }
 	virtual void doSomething() = 0;
 	int getHealth(){ return m_hitPoints; }
-	void decHealth(){ m_hitPoints -= 2; }
+	virtual void decHealth(){ m_hitPoints -= 2; }
 	virtual ~healthyActor(){}
 	void RestoreHealth();
 private:
@@ -101,6 +101,7 @@ public:
 	virtual void doSomething();
 	void setHasGoodie();
 	bool moveKlepto();
+	void decHealth();
 private:
 	int distanceBeforeTurning;
 	bool hasGoodie;
