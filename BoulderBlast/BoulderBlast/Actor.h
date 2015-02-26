@@ -72,11 +72,49 @@ public:
 	virtual ~Boulder(){}//empty virtual destructor
 };
 
+class KleptoBotFactory : public Actor
+{
+public:
+	KleptoBotFactory(bool angry, int x, int y, StudentWorld* world) : Actor(IID_ROBOT_FACTORY, x, y, none, world), m_angry(angry) {}
+	virtual void doSomething();
+private:
+	bool m_angry; //type of factory
+};
+
+//abstract class
+class Robot : public healthyActor
+{
+public:
+	Robot(int x, int y, Direction dir, StudentWorld* world, int ID, int hp);
+	int getTicks() { return ticks; }
+	void setTicks(int to) { ticks = to; }
+	void resetTicks();
+private:
+	int ticks;
+};
+
+class KleptoBot : public Robot
+{
+public:
+	KleptoBot(int x, int y, StudentWorld* world);
+	virtual void doSomething();
+	void setHasGoodie();
+	bool moveKlepto();
+private:
+	int distanceBeforeTurning;
+	bool hasGoodie;
+};
 class Hole : public Actor
 {
 public:
 	Hole(int x, int y, StudentWorld* world) :Actor(IID_HOLE, x, y, none, world){}
 	virtual void doSomething(){}//holes cant do shit
+};
+class Exit :public Actor
+{
+public:
+	Exit(int x, int y, StudentWorld* world);
+	virtual void doSomething();
 };
 
 //abstract class
@@ -117,13 +155,6 @@ class AmmoGoodie : public Goodie
 {
 public:
 	AmmoGoodie(int x, int y, StudentWorld* world) : Goodie(x, y, world, IID_AMMO){}
-	virtual void doSomething();
-};
-
-class Exit :public Actor
-{
-public:
-	Exit(int x, int y, StudentWorld* world);
 	virtual void doSomething();
 };
 

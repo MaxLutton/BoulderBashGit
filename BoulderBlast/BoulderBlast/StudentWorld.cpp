@@ -61,6 +61,10 @@ int StudentWorld::init()
 			m_actors.push_back(new RestoreHealthGoodie(x, y, this));
 		if (a == 9)
 			m_actors.push_back(new AmmoGoodie(x, y, this));
+		if (a == 10)
+			m_actors.push_back(new KleptoBotFactory(false, x, y, this));
+		if (a == 11)
+			m_actors.push_back(new KleptoBotFactory(true, x, y, this));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
@@ -181,6 +185,10 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 		return 8;
 	if (item == Level::ammo)
 		return 9;
+	if (item == Level::kleptobot_factory)
+		return 10;
+	if (item == Level::angry_kleptobot_factory)
+		return 11;
 	else //will be for blank spaces later
 		return 0;
 }

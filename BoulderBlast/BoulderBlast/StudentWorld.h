@@ -33,6 +33,7 @@ public:
 	void decrJewels(); //decriments m_nJewels by one
 	bool jewelsLeft(){ return m_nJewels > 0; } //returns if there are still jewels to be had
 	void setLevelCompleted(bool to);
+	int levelNumber(){ return getLevel(); } //meh maybe remove later
 
 private:
 	std::vector<Actor*> m_actors;

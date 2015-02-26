@@ -1,6 +1,7 @@
 #include "Actor.h"
 #include "StudentWorld.h"
-#include "Level.h"
+#include <cstdlib>
+
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, StudentWorld* world) : GraphObject(imageID, startX, startY, startDirection)
@@ -27,6 +28,9 @@ int Actor::whatsThere(int x, int y)
 		Hole* hp = dynamic_cast<Hole*>(ap);
 		if (hp != nullptr)
 			return 4; //hole
+		KleptoBot* kp = dynamic_cast<KleptoBot*>(ap);
+		if (kp != nullptr) //kleptobot
+			return 5;
 	}
 	return 0; //space or bullet :D
 }
@@ -160,7 +164,19 @@ void Player::doSomething()
 	}
 }
 
+Robot::Robot(int x, int y, Direction dir, StudentWorld* world, int ID, int hp) : healthyActor(ID, x, y, dir, world, hp)
+{
+	ticks = (28 - (world->levelNumber())) / 4;
+	if (ticks < 3)
+		ticks = 3;
+}
 
+void Robot::resetTicks()
+{
+	ticks = (28 - (getWorld()->levelNumber())) / 4;
+	if (ticks < 3)
+		ticks = 3;
+}
 
 Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Actor(IID_BULLET, startX, startY, dir, world){}
 
@@ -336,3 +352,190 @@ void AmmoGoodie::doSomething()
 		world->getPlayer()->incrAmmo();
 	}
 }
+
+void KleptoBotFactory::doSomething()
+{
+	StudentWorld* world = getWorld();
+	int count = 0;
+	int x = getX();
+	int y = getY();
+	//don't add a kleptoBot if there is one on the factory's square
+	if (whatsThere(x, 7) == 5)
+		return;
+	//can I make this more efficient? Is pretty awful right now...
+	for (int c = 1; c < 4; c++)
+		for (int r = 1; r < 4; r++)
+		{
+		if (x - c >= 0 )
+		{
+			if (whatsThere(x - c, y) == 5)
+				count++;
+			if (y - r >= 0)
+				if (whatsThere(x - c, y - r) == 5)
+					count++;
+		}
+		if (x + c < VIEW_WIDTH)
+		{
+			if (whatsThere(x + c, y) == 5)
+				count++;
+			if (y + r < VIEW_HEIGHT)
+				if (whatsThere(x + c, y + r) == 5)
+					count++;
+		}
+		if (y - r >= 0)
+		{
+			if (whatsThere(x, y - r) == 5)
+				count++;
+			if (x + c < VIEW_WIDTH)
+				if (whatsThere(x + c, y - r) == 5)
+					count++;
+		}
+		if (y + r < VIEW_HEIGHT)
+		{
+			if (whatsThere(x, y + r) == 5)
+				count++;
+			if (x - c >= 0)
+				if (whatsThere(x - c, y + r) == 5)
+					count++;
+		}
+		}
+	if (count < 3)
+	{
+		//1 in 50 chance of making new kleptobot
+		int r = rand() % 50;
+		if (r == 42)
+		{
+			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world));
+			world->playSound(SOUND_ROBOT_BORN);
+		}
+	}
+		
+}
+
+KleptoBot::KleptoBot(int x, int y, StudentWorld* world) : Robot(x, y, right, world, IID_KLEPTOBOT, 5), hasGoodie(false)
+{
+	distanceBeforeTurning = rand() % 7 + 1;
+
+}
+GraphObject::Direction getRandomDirection()
+{
+	int r = rand() % 4;
+	switch (r)
+	{
+	case 0:
+		return GraphObject::Direction::left;
+		break;
+	case 1:
+		return GraphObject::Direction::right;
+		break;
+	case 2:
+		return GraphObject::Direction::up;
+		break;
+	case 3:
+		return GraphObject::Direction::down;
+			break;
+	}
+}
+
+void KleptoBot::doSomething()
+{
+	int t = getTicks();
+	//should rest
+	if (t != 0)
+	{
+		setTicks(--t);
+		return;
+	}
+	else
+	{
+		//reset ticks so bot will rest after this turn
+		resetTicks();
+		bool notBlocked = false;
+		//hasnt gone full distance yet. Check if direction is blocked, if not, moves to adjacent position.
+		//If path is blocked, set flag to false so we know to reset direction
+		if (distanceBeforeTurning != 0)
+		{
+			//if it moved, then sets notBlocked to true.
+			notBlocked = moveKlepto();
+			distanceBeforeTurning--;
+		}
+		//either couldn't move or fulfilled distanceBeforeTurning
+		if (notBlocked == false)
+		{
+			//get random distances and directions
+			distanceBeforeTurning = rand() % 6 + 1;
+			Direction d = getRandomDirection();
+			setDirection(d);
+			int i = 0;
+			//if random direction doesn't work, then try all other directions! (including the random one again because idk what the current d is)
+			//IS THIS OK?
+			while (i < 5)
+			{
+				if (moveKlepto())
+					break;
+				else if (i == 0)
+					setDirection(left);
+				else if (i == 1)
+					setDirection(right);
+				else if (i == 2)
+					setDirection(up);
+				else if (i == 3)
+					setDirection(down);
+				i++;
+			}
+			//went thru all directions and couldn't move, so set direction back to d
+			if (i == 5)
+				setDirection(d);
+		}
+	}
+}
+
+//Tries to move KleptoBot in its direction. If its direction is blocked, then this returns false. Otherwise, returns true.
+bool KleptoBot::moveKlepto()
+{
+	int next = 0;
+	int col = getX();
+	int row = getY();
+	Direction d = getDirection();
+	Player* p = getWorld()->getPlayer();
+	int px = p->getX();
+	int py = p->getY();
+	switch (d)
+	{
+	case left:
+		next = whatsThere(col - 1, row);
+		if (next == 0 && col - 1 !=px && row != py)
+			moveTo(col - 1, row);
+		else
+			return false;
+		break;
+	case right:
+		next = whatsThere(col + 1, row);
+		if (next == 0 && col + 1 != px && row != py)
+			moveTo(col + 1, row);
+		else
+			return false;
+		break;
+	case up:
+		next = whatsThere(col, row + 1);
+		if (next == 0 && col != px && row +1 != py)
+			moveTo(col, row + 1);
+		else
+			return false;
+		break;
+	case down:
+		next = whatsThere(col, row - 1);
+		if (next == 0 && col != px && row - 1 != py)
+			moveTo(col, row - 1);
+		else
+			return false;
+		break;
+	}
+	return true;
+}
+
+void KleptoBot::setHasGoodie()
+{
+	hasGoodie = true;
+}
+
