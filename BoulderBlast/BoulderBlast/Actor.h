@@ -77,10 +77,15 @@ public:
 	virtual void doSomething(){}//holes cant do shit
 };
 
-class Jewel : public Actor
+class PickupableItem : public Actor
 {
 public:
-	Jewel(int x, int y, StudentWorld* world) :Actor(IID_JEWEL, x, y, none, world){}
+	PickupableItem(int x, int y, StudentWorld* world, int ID) : Actor(ID, x, y, none, world){}
+};
+class Jewel : public PickupableItem
+{
+public:
+	Jewel(int x, int y, StudentWorld* world) :PickupableItem(x, y, world, IID_JEWEL){}
 	virtual void doSomething();
 };
 

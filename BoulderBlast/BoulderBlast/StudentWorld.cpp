@@ -35,6 +35,7 @@ int StudentWorld::init()
 	//load level file
 	unsigned int lev = getLevel();
 	m_bonus = 1000; //set bonus every time level loads
+	m_nJewels = 0;
 	for (int x = 0; x < VIEW_WIDTH; x++)
 		for (int y = 0; y < VIEW_HEIGHT; y++)
 		{
@@ -180,9 +181,9 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		int row = (*it)->getY();
 		if (col == x && row == y)
 		{	
-			Jewel* jp = dynamic_cast<Jewel*>(*it);
+			PickupableItem* pp = dynamic_cast<PickupableItem*>(*it);
 			Exit* xp = dynamic_cast<Exit*>(*it);
-			if (jp == nullptr && xp == nullptr)
+			if (pp == nullptr && xp == nullptr)
 				return *it; //not the jewel or exit
 			it++; ///was a jewel or exit
 		}
