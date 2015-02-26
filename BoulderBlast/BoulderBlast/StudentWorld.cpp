@@ -203,7 +203,8 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		{	
 			PickupableItem* pp = dynamic_cast<PickupableItem*>(*it);
 			Exit* xp = dynamic_cast<Exit*>(*it);
-			if (pp == nullptr && xp == nullptr)
+			KleptoBotFactory* kf = dynamic_cast<KleptoBotFactory*>(*it);
+			if (pp == nullptr && xp == nullptr && kf == nullptr)
 				return *it; //not the jewel or exit
 			it++; ///was a jewel or exit
 		}

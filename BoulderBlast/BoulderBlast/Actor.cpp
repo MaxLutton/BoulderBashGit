@@ -353,6 +353,17 @@ void AmmoGoodie::doSomething()
 	}
 }
 
+bool Robot::sameCoordAsPlayer(int x, int y)
+{
+	bool col = false;
+	bool row = false;
+	if (x == getWorld()->getPlayer()->getX())
+		col = true;
+	if (y == getWorld()->getPlayer()->getY())
+		row = true;
+	return (col == true && row == true);
+}
+
 void KleptoBotFactory::doSomething()
 {
 	StudentWorld* world = getWorld();
@@ -360,7 +371,7 @@ void KleptoBotFactory::doSomething()
 	int x = getX();
 	int y = getY();
 	//don't add a kleptoBot if there is one on the factory's square
-	if (whatsThere(x, 7) == 5)
+	if (whatsThere(x, y) == 5)
 		return;
 	//can I make this more efficient? Is pretty awful right now...
 	for (int c = 1; c < 4; c++)
@@ -443,7 +454,7 @@ void KleptoBot::doSomething()
 	//should rest
 	if (t != 0)
 	{
-		setTicks(--t);
+		setTicks(t - 1);
 		return;
 	}
 	else
@@ -504,28 +515,28 @@ bool KleptoBot::moveKlepto()
 	{
 	case left:
 		next = whatsThere(col - 1, row);
-		if (next == 0 && col - 1 !=px && row != py)
+		if (next == 0 && !sameCoordAsPlayer(col - 1, row))
 			moveTo(col - 1, row);
 		else
 			return false;
 		break;
 	case right:
 		next = whatsThere(col + 1, row);
-		if (next == 0 && col + 1 != px && row != py)
+		if (next == 0 && !sameCoordAsPlayer(col+1, row))
 			moveTo(col + 1, row);
 		else
 			return false;
 		break;
 	case up:
 		next = whatsThere(col, row + 1);
-		if (next == 0 && col != px && row +1 != py)
+		if (next == 0 && !sameCoordAsPlayer(col, row + 1))
 			moveTo(col, row + 1);
 		else
 			return false;
 		break;
 	case down:
 		next = whatsThere(col, row - 1);
-		if (next == 0 && col != px && row - 1 != py)
+		if (next == 0  && !sameCoordAsPlayer(col, row - 1))
 			moveTo(col, row - 1);
 		else
 			return false;

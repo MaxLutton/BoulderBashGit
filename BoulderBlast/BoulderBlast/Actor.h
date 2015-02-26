@@ -89,6 +89,7 @@ public:
 	int getTicks() { return ticks; }
 	void setTicks(int to) { ticks = to; }
 	void resetTicks();
+	bool sameCoordAsPlayer(int x, int y);
 private:
 	int ticks;
 };
