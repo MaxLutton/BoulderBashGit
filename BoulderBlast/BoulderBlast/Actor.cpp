@@ -322,8 +322,10 @@ void Goodie::doSomething()
 		if (whatsThere(getX(), getY()) == 5)
 		{
 			//one in ten chance of grabbing goodie
+			Actor* klepto = getWorld()->getActor(getX(), getY());
 			int r = rand() % 10;
-			if (r == 2)
+			//can get the goodie if not already holding one
+			if (r == 2 && !(klepto->holdingGoodie()))
 			{
 				std::string type;
 				ExtraLifeGoodie* ep = dynamic_cast<ExtraLifeGoodie*>(this);
@@ -447,18 +449,24 @@ void KleptoBotFactory::doSomething()
 		int r = rand() % 50;
 		if (r == 42)
 		{
-			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world));
+			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world, IID_KLEPTOBOT));
 			world->playSound(SOUND_ROBOT_BORN);
 		}
 	}
 		
 }
 
-KleptoBot::KleptoBot(int x, int y, StudentWorld* world) : Robot(x, y, right, world, IID_KLEPTOBOT, 5), hasGoodie(false)
+KleptoBot::KleptoBot(int x, int y, StudentWorld* world, int ID) : Robot(x, y, right, world, ID, 5), hasGoodie(false)
 {
 	distanceBeforeTurning = rand() % 7 + 1;
 
 }
+
+AngryKleptoBot::AngryKleptoBot(int x, int y, StudentWorld* world) : KleptoBot(x, y, world, IID_ANGRY_KLEPTOBOT)
+{
+
+}
+
 KleptoBot::~KleptoBot()
 {
 	if (hasGoodie)
@@ -601,6 +609,11 @@ void KleptoBot::decHealth()
 		world->increaseScore(10);
 		setIsAlive(false);
 	}
+}
+
+bool KleptoBot::holdingGoodie()
+{
+	return hasGoodie;
 }
 
 void KleptoBot::setHasGoodie(std::string type)

@@ -18,6 +18,7 @@ public:
 	virtual int getHealth() { return -1; }//does nothin since no health
 	virtual ~Actor(){}//empty virtual destructor
 	virtual void setHasGoodie(std::string type){}//needed for kleptobots
+	virtual bool holdingGoodie(){ return false; }
 private:
 	StudentWorld* m_world;
 	bool m_isAlive;
@@ -98,17 +99,27 @@ private:
 class KleptoBot : public Robot
 {
 public:
-	KleptoBot(int x, int y, StudentWorld* world);
+	KleptoBot(int x, int y, StudentWorld* world, int ID);
 	virtual void doSomething();
 	void setHasGoodie(std::string type);
 	bool moveKlepto();
 	void decHealth();
+	bool holdingGoodie();
 	virtual ~KleptoBot();
 private:
 	int distanceBeforeTurning;
 	bool hasGoodie;
 	std::string typeOfGoodie;
 };
+
+
+class AngryKleptoBot :public KleptoBot
+{
+public:
+	AngryKleptoBot(int x, int y, StudentWorld* world);
+	virtual void doSomething(){}
+};
+
 class Hole : public Actor
 {
 public:
