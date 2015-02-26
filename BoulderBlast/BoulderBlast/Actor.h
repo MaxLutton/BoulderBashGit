@@ -77,6 +77,7 @@ public:
 	virtual void doSomething(){}//holes cant do shit
 };
 
+//abstract class
 class PickupableItem : public Actor
 {
 public:
@@ -86,6 +87,19 @@ class Jewel : public PickupableItem
 {
 public:
 	Jewel(int x, int y, StudentWorld* world) :PickupableItem(x, y, world, IID_JEWEL){}
+	virtual void doSomething();
+};
+//abstract class
+class Goodie : public PickupableItem
+{
+public:
+	Goodie(int x, int y, StudentWorld* world, int ID) :PickupableItem(x, y, world, ID){}
+};
+
+class ExtraLifeGoodie :public Goodie
+{
+public:
+	ExtraLifeGoodie(int x, int y, StudentWorld* world) : Goodie(x, y, world, IID_EXTRA_LIFE){}
 	virtual void doSomething();
 };
 

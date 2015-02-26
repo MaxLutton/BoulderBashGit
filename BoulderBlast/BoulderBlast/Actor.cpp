@@ -281,3 +281,19 @@ void Exit::doSomething()
 		}
 	}
 }
+
+void ExtraLifeGoodie::doSomething()
+{
+	StudentWorld* world = getWorld();
+	int x = getX();
+	int y = getY();
+	int px = world->getPlayer()->getX();
+	int py = world->getPlayer()->getY();
+	if (x == px && y == py)
+	{
+		world->increaseScore(1000);
+		world->playSound(SOUND_GOT_GOODIE);
+		setIsAlive(false);
+		world->incLives();
+	}
+}
