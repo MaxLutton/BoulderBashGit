@@ -59,6 +59,7 @@ public:
 	virtual void doSomething();
 	int getAmmo(){ return m_ammo; }
 	virtual ~Player(){}//empty virtual destructor
+	void incrAmmo();
 private:
 	int m_ammo;
 };
@@ -83,6 +84,7 @@ class PickupableItem : public Actor
 {
 public:
 	PickupableItem(int x, int y, StudentWorld* world, int ID) : Actor(ID, x, y, none, world){}
+	bool IsPlayerOnMe(StudentWorld* world);//used by items to see if the player is at same coordinate as item
 };
 class Jewel : public PickupableItem
 {
@@ -108,6 +110,13 @@ class RestoreHealthGoodie : public Goodie
 {
 public:
 	RestoreHealthGoodie(int x, int y, StudentWorld* world) : Goodie(x, y, world, IID_RESTORE_HEALTH){}
+	virtual void doSomething();
+};
+
+class AmmoGoodie : public Goodie
+{
+public:
+	AmmoGoodie(int x, int y, StudentWorld* world) : Goodie(x, y, world, IID_AMMO){}
 	virtual void doSomething();
 };
 

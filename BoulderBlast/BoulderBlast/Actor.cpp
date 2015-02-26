@@ -39,7 +39,11 @@ void healthyActor::RestoreHealth()
 Player::Player(int startX, int startY, StudentWorld* world) : healthyActor(IID_PLAYER, startX, startY, right, world, 20)
 {
 	m_ammo = 20;
+}
 
+void Player::incrAmmo()
+{
+	m_ammo += 20;
 }
 
 void Player::doSomething()
@@ -287,14 +291,19 @@ void Exit::doSomething()
 	}
 }
 
-void ExtraLifeGoodie::doSomething()
+bool PickupableItem::IsPlayerOnMe(StudentWorld* world)
 {
-	StudentWorld* world = getWorld();
 	int x = getX();
 	int y = getY();
 	int px = world->getPlayer()->getX();
 	int py = world->getPlayer()->getY();
-	if (x == px && y == py)
+	return (x == px && y == py);
+}
+
+void ExtraLifeGoodie::doSomething()
+{
+	StudentWorld* world = getWorld();
+	if (IsPlayerOnMe(world))
 	{
 		world->increaseScore(1000);
 		world->playSound(SOUND_GOT_GOODIE);
@@ -306,16 +315,24 @@ void ExtraLifeGoodie::doSomething()
 void RestoreHealthGoodie::doSomething()
 {
 	StudentWorld* world = getWorld();
-	int x = getX();
-	int y = getY();
-	int px = world->getPlayer()->getX();
-	int py = world->getPlayer()->getY();
-	if (x == px && y == py)
+	if (IsPlayerOnMe(world))
 	{
 		world->increaseScore(500);
 		world->playSound(SOUND_GOT_GOODIE);
 		setIsAlive(false);
 		world->getPlayer()->RestoreHealth();
 		
+	}
+}
+
+void AmmoGoodie::doSomething()
+{
+	StudentWorld* world = getWorld();
+	if (IsPlayerOnMe(world))
+	{
+		world->increaseScore(100);
+		world->playSound(SOUND_GOT_GOODIE);
+		setIsAlive(false);
+		world->getPlayer()->incrAmmo();
 	}
 }

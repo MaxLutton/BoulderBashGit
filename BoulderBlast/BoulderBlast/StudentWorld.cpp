@@ -59,6 +59,8 @@ int StudentWorld::init()
 			m_actors.push_back(new ExtraLifeGoodie(x, y, this));
 		if (a == 8)
 			m_actors.push_back(new RestoreHealthGoodie(x, y, this));
+		if (a == 9)
+			m_actors.push_back(new AmmoGoodie(x, y, this));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
@@ -177,6 +179,8 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 		return 7;
 	if (item == Level::restore_health)
 		return 8;
+	if (item == Level::ammo)
+		return 9;
 	else //will be for blank spaces later
 		return 0;
 }
