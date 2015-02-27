@@ -103,10 +103,11 @@ private:
 class KleptoBot : public Robot
 {
 public:
-	KleptoBot(int x, int y, StudentWorld* world, int ID);
+	KleptoBot(int x, int y, StudentWorld* world, int ID, int hp);
 	virtual void doSomething();
 	void setHasGoodie(std::string type);
 	bool holdingGoodie();
+	void moveKleptoBot();
 	virtual ~KleptoBot();
 private:
 	int distanceBeforeTurning;
@@ -119,7 +120,7 @@ class AngryKleptoBot :public KleptoBot
 {
 public:
 	AngryKleptoBot(int x, int y, StudentWorld* world);
-	virtual void doSomething(){}
+	virtual void doSomething();
 	virtual ~AngryKleptoBot();
 };
 

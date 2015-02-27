@@ -192,21 +192,25 @@ bool Robot::shoot()
 	if (d == left && y == py && x > px && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
 	else if (d == right && y == py && x < px && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
 	else if (d == up && x == px && y > py && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
 	else if (d == down && x == px && y < py && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
 	return false;
@@ -592,7 +596,7 @@ void KleptoBotFactory::doSomething()
 		int r = rand() % 50;
 		if (r == 42 && m_angry == false)
 		{
-			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world, IID_KLEPTOBOT));
+			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world, IID_KLEPTOBOT, 5));
 			world->playSound(SOUND_ROBOT_BORN);
 		}//this is an angry kleptobot factory
 		else if (r == 42 && m_angry == true)
@@ -603,15 +607,56 @@ void KleptoBotFactory::doSomething()
 	}
 }
 
+//Tries to move KleptoBot in its direction. If its direction is blocked, then this returns false. Otherwise, returns true.
+bool Robot::moveRobot()
+{
+	int next = 0;
+	int col = getX();
+	int row = getY();
+	Direction d = getDirection();
+	Player* p = getWorld()->getPlayer();
+	int px = p->getX();
+	int py = p->getY();
+	switch (d)
+	{
+	case left:
+		next = whatsThere(col - 1, row);
+		if (next == 0 && !playerOnMe(col - 1, row))
+			moveTo(col - 1, row);
+		else
+			return false;
+		break;
+	case right:
+		next = whatsThere(col + 1, row);
+		if (next == 0 && !playerOnMe(col + 1, row))
+			moveTo(col + 1, row);
+		else
+			return false;
+		break;
+	case up:
+		next = whatsThere(col, row + 1);
+		if (next == 0 && !playerOnMe(col, row + 1))
+			moveTo(col, row + 1);
+		else
+			return false;
+		break;
+	case down:
+		next = whatsThere(col, row - 1);
+		if (next == 0 && !playerOnMe(col, row - 1))
+			moveTo(col, row - 1);
+		else
+			return false;
+		break;
+	}
+	return true;
+}
 
-KleptoBot::KleptoBot(int x, int y, StudentWorld* world, int ID) : Robot(x, y, right, world, ID, 5), hasGoodie(false)
+KleptoBot::KleptoBot(int x, int y, StudentWorld* world, int ID, int hp) : Robot(x, y, right, world, ID, hp), hasGoodie(false)
 {
 	distanceBeforeTurning = rand() % 7 + 1;
 }
 
-AngryKleptoBot::AngryKleptoBot(int x, int y, StudentWorld* world) : KleptoBot(x, y, world, IID_ANGRY_KLEPTOBOT)
-{
-}
+AngryKleptoBot::AngryKleptoBot(int x, int y, StudentWorld* world) : KleptoBot(x, y, world, IID_ANGRY_KLEPTOBOT, 8){}
 
 KleptoBot::~KleptoBot()
 {
@@ -663,91 +708,7 @@ void KleptoBot::doSomething()
 		return;
 	}
 	else
-	{
-		//reset ticks so bot will rest after this turn
-		resetTicks();
-		bool notBlocked = false;
-		//hasnt gone full distance yet. Check if direction is blocked, if not, moves to adjacent position.
-		//If path is blocked, set flag to false so we know to reset direction
-		if (distanceBeforeTurning != 0)
-		{
-			//if it moved, then sets notBlocked to true.
-			notBlocked = moveRobot();
-			distanceBeforeTurning--;
-		}
-		//either couldn't move or fulfilled distanceBeforeTurning
-		if (notBlocked == false)
-		{
-			//get random distances and directions
-			distanceBeforeTurning = rand() % 6 + 1;
-			Direction d = getRandomDirection();
-			setDirection(d);
-			int i = 0;
-			//if random direction doesn't work, then try all other directions! (including the random one again because idk what the current d is)
-			//IS THIS OK?
-			while (i < 5)
-			{
-				if (moveRobot())
-					break;
-				else if (i == 0)
-					setDirection(left);
-				else if (i == 1)
-					setDirection(right);
-				else if (i == 2)
-					setDirection(up);
-				else if (i == 3)
-					setDirection(down);
-				i++;
-			}
-			//went thru all directions and couldn't move, so set direction back to d
-			if (i == 5)
-				setDirection(d);
-		}
-	}
-}
-
-//Tries to move KleptoBot in its direction. If its direction is blocked, then this returns false. Otherwise, returns true.
-bool Robot::moveRobot()
-{
-	int next = 0;
-	int col = getX();
-	int row = getY();
-	Direction d = getDirection();
-	Player* p = getWorld()->getPlayer();
-	int px = p->getX();
-	int py = p->getY();
-	switch (d)
-	{
-	case left:
-		next = whatsThere(col - 1, row);
-		if (next == 0 && !playerOnMe(col-1,row))
-			moveTo(col - 1, row);
-		else
-			return false;
-		break;
-	case right:
-		next = whatsThere(col + 1, row);
-		if (next == 0 && !playerOnMe(col+1,row))
-			moveTo(col + 1, row);
-		else
-			return false;
-		break;
-	case up:
-		next = whatsThere(col, row + 1);
-		if (next == 0 && !playerOnMe(col, row+1))
-			moveTo(col, row + 1);
-		else
-			return false;
-		break;
-	case down:
-		next = whatsThere(col, row - 1);
-		if (next == 0 && !playerOnMe(col, row-1))
-			moveTo(col, row - 1);
-		else
-			return false;
-		break;
-	}
-	return true;
+		moveKleptoBot();
 }
 
 void Robot::decHealth()
@@ -774,3 +735,63 @@ void KleptoBot::setHasGoodie(std::string type)
 	typeOfGoodie = type;
 }
 
+void KleptoBot::moveKleptoBot()
+{
+	//reset ticks so bot will rest after this turn
+	resetTicks();
+	bool notBlocked = false;
+	//hasnt gone full distance yet. Check if direction is blocked, if not, moves to adjacent position.
+	//If path is blocked, set flag to false so we know to reset direction
+	if (distanceBeforeTurning != 0)
+	{
+		//if it moved, then sets notBlocked to true.
+		notBlocked = moveRobot();
+		distanceBeforeTurning--;
+	}
+	//either couldn't move or fulfilled distanceBeforeTurning
+	if (notBlocked == false)
+	{
+		//get random distances and directions
+		distanceBeforeTurning = rand() % 6 + 1;
+		Direction d = getRandomDirection();
+		setDirection(d);
+		int i = 0;
+		//if random direction doesn't work, then try all other directions! (including the random one again because idk what the current d is)
+		//IS THIS OK?
+		while (i < 5)
+		{
+			if (moveRobot())
+				break;
+			else if (i == 0)
+				setDirection(left);
+			else if (i == 1)
+				setDirection(right);
+			else if (i == 2)
+				setDirection(up);
+			else if (i == 3)
+				setDirection(down);
+			i++;
+		}
+		//went thru all directions and couldn't move, so set direction back to d
+		if (i == 5)
+			setDirection(d);
+	}
+}
+
+void AngryKleptoBot::doSomething()
+{
+	int t = getTicks();
+	//should rest
+	if (t != 0)
+	{
+		setTicks(t - 1);
+		return;
+	}
+	else if (shoot())
+	{
+		resetTicks();
+		return;
+	}
+	else
+		moveKleptoBot();
+}
