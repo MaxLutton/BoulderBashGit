@@ -106,14 +106,15 @@ class KleptoBot : public Robot
 public:
 	KleptoBot(int x, int y, StudentWorld* world, int ID, int hp);
 	virtual void doSomething();
-	void setHasGoodie(std::string type);
+	void setHasGoodie(int type);
 	bool holdingGoodie();
 	void moveKleptoBot();
 	virtual ~KleptoBot();
+	bool grabGoodie();
 private:
 	int distanceBeforeTurning;
 	bool hasGoodie;
-	std::string typeOfGoodie;
+	int typeOfGoodie;
 };
 
 
@@ -160,11 +161,11 @@ public:
 	virtual void doSomething();
 };
 
+//abstract class
 class Goodie : public PickupableItem
 {
 public:
 	Goodie(int x, int y, StudentWorld* world, int ID) :PickupableItem(x, y, world, ID){}
-	virtual void doSomething();
 };
 
 class ExtraLifeGoodie :public Goodie

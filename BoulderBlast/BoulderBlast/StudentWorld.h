@@ -8,6 +8,7 @@
 
 class Actor;
 class Player;
+class Goodie;
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
@@ -34,6 +35,7 @@ public:
 	bool jewelsLeft(){ return m_nJewels > 0; } //returns if there are still jewels to be had
 	void setLevelCompleted(bool to);
 	int levelNumber(){ return getLevel(); } //meh maybe remove later
+	Goodie* getGoodie(int x, int y);
 
 private:
 	std::vector<Actor*> m_actors;
@@ -56,5 +58,6 @@ inline void StudentWorld::setLevelCompleted(bool to)
 {
 	m_levelCompleted = to;
 }
+
 
 #endif // STUDENTWORLD_H_

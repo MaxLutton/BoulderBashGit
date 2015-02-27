@@ -1,6 +1,7 @@
 #include "Actor.h"
 #include "StudentWorld.h"
 #include <cstdlib>
+#include "Level.h"
 
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
@@ -483,33 +484,6 @@ bool Actor::playerOnMe(int x, int y)
 	return (x == px && y == py);
 }
 
-void Goodie::doSomething()
-{
-	//kleptobot is on goodie
-		if (whatsThere(getX(), getY()) == 5)
-		{
-			//one in ten chance of grabbing goodie
-			Actor* klepto = getWorld()->getActor(getX(), getY());
-			int r = rand() % 10;
-			//can get the goodie if not already holding one
-			if (r == 2 && !(klepto->holdingGoodie()))
-			{
-				std::string type;
-				ExtraLifeGoodie* ep = dynamic_cast<ExtraLifeGoodie*>(this);
-				if (ep != nullptr)
-					type = "life";
-				RestoreHealthGoodie* rp = dynamic_cast<RestoreHealthGoodie*>(this);
-				if (rp != nullptr)
-					type = "health";
-				AmmoGoodie* ap = dynamic_cast<AmmoGoodie*>(this);
-				if (ap != nullptr)
-					type = "ammo";
-				getWorld()->getActor(getX(), getY())->setHasGoodie(type);
-				setIsAlive(false);
-				getWorld()->playSound(SOUND_ROBOT_MUNCH);
-			}
-	}
-}
 
 void ExtraLifeGoodie::doSomething()
 {
@@ -521,8 +495,7 @@ void ExtraLifeGoodie::doSomething()
 		setIsAlive(false);
 		world->incLives();
 	}
-	else
-		Goodie::doSomething();
+
 }
 
 void RestoreHealthGoodie::doSomething()
@@ -535,8 +508,6 @@ void RestoreHealthGoodie::doSomething()
 		setIsAlive(false);
 		world->getPlayer()->RestoreHealth();
 	}
-	else
-		Goodie::doSomething();
 }
 
 void AmmoGoodie::doSomething()
@@ -549,8 +520,6 @@ void AmmoGoodie::doSomething()
 		setIsAlive(false);
 		world->getPlayer()->incrAmmo();
 	}
-	else
-		Goodie::doSomething();
 }
 
 
@@ -672,11 +641,11 @@ KleptoBot::~KleptoBot()
 {
 	if (hasGoodie)
 	{
-		if (typeOfGoodie == "life")
+		if (typeOfGoodie == Level::extra_life)
 			getWorld()->getm_Actors()->push_back(new ExtraLifeGoodie(getX(), getY(), getWorld()));
-		if (typeOfGoodie == "health")
+		if (typeOfGoodie == Level::restore_health)
 			getWorld()->getm_Actors()->push_back(new RestoreHealthGoodie(getX(), getY(), getWorld()));
-		if (typeOfGoodie == "ammo")
+		if (typeOfGoodie == Level::ammo)
 			getWorld()->getm_Actors()->push_back(new AmmoGoodie(getX(), getY(), getWorld()));
 	}
 	getWorld()->increaseScore(10);
@@ -717,6 +686,8 @@ void KleptoBot::doSomething()
 		setTicks(t - 1);
 		return;
 	}
+	else if (grabGoodie())
+		return;
 	else
 		moveKleptoBot();
 }
@@ -739,7 +710,7 @@ bool KleptoBot::holdingGoodie()
 	return hasGoodie;
 }
 
-void KleptoBot::setHasGoodie(std::string type)
+void KleptoBot::setHasGoodie(int type)
 {
 	hasGoodie = true;
 	typeOfGoodie = type;
@@ -804,4 +775,34 @@ void AngryKleptoBot::doSomething()
 	}
 	else
 		moveKleptoBot();
+}
+
+bool KleptoBot::grabGoodie()
+{
+	Goodie* g = getWorld()->getGoodie(getX(), getY());
+	//is on a goodie
+	if (g != nullptr)
+	{
+		int r = rand() % 10;
+		//can get the goodie if not already holding one
+		if (r == 2 && !holdingGoodie())
+		{
+			int type;
+			ExtraLifeGoodie* ep = dynamic_cast<ExtraLifeGoodie*>(g);
+			if (ep != nullptr)
+				type = Level::extra_life;
+			RestoreHealthGoodie* rp = dynamic_cast<RestoreHealthGoodie*>(g);
+			if (rp != nullptr)
+				type = Level::restore_health;
+			AmmoGoodie* ap = dynamic_cast<AmmoGoodie*>(g);
+			if (ap != nullptr)
+				type = Level::ammo;
+			setHasGoodie(type);
+			g->setIsAlive(false);
+			getWorld()->playSound(SOUND_ROBOT_MUNCH);
+			resetTicks();
+			return true;
+		}
+	}
+	return false;
 }

@@ -229,3 +229,24 @@ void StudentWorld::decrJewels()
 {
 	m_nJewels--;
 }
+
+Goodie* StudentWorld::getGoodie(int x, int y)
+{
+	vector<Actor*>::iterator it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		int col = (*it)->getX();
+		int row = (*it)->getY();
+		if (col == x && row == y)
+		{
+			Goodie* gp = dynamic_cast<Goodie*>(*it);
+			if (gp != nullptr)
+				return gp;
+			else
+				it++;
+		}
+		else
+			it++;
+	}
+	return nullptr;
+}
