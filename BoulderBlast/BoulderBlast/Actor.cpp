@@ -53,6 +53,12 @@ void Player::incrAmmo()
 	m_ammo += 20;
 }
 
+void Player::decHealth()
+{
+	healthyActor::decHealth();
+	getWorld()->playSound(SOUND_PLAYER_IMPACT);
+}
+
 void Player::doSomething()
 {
 	int x;
@@ -201,13 +207,13 @@ bool Robot::shoot()
 		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
-	else if (d == up && x == px && y > py && shotNotBlocked(d))
+	else if (d == up && x == px && y < py && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
 		world->playSound(SOUND_ENEMY_FIRE);
 		return true;
 	}
-	else if (d == down && x == px && y < py && shotNotBlocked(d))
+	else if (d == down && x == px && y > py && shotNotBlocked(d))
 	{
 		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
 		world->playSound(SOUND_ENEMY_FIRE);
@@ -229,7 +235,7 @@ bool Robot::shotNotBlocked(Direction d)
 		{
 			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x + 1, y) !=7)
+			else if (whatsThere(x + 1, y) != 0)
 				return false;
 				x++;
 		}
@@ -352,6 +358,7 @@ void Bullet::moveBullet()
 		{
 			Player* p = getWorld()->getPlayer();
 			p->decHealth();
+			setIsAlive(false);
 			if (p->getHealth() <= 0)
 				p->setIsAlive(false);
 		}
@@ -372,6 +379,7 @@ void Bullet::moveBullet()
 		else if (playerOnMe(col + 1, row))
 		{
 			Player* p = getWorld()->getPlayer();
+			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
 				p->setIsAlive(false);
@@ -393,6 +401,7 @@ void Bullet::moveBullet()
 		else if (playerOnMe(col, row + 1))
 		{
 			Player* p = getWorld()->getPlayer();
+			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
 				p->setIsAlive(false);
@@ -414,6 +423,7 @@ void Bullet::moveBullet()
 		else if (playerOnMe(col, row - 1))
 		{
 			Player* p = getWorld()->getPlayer();
+			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
 				p->setIsAlive(false);

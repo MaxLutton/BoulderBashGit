@@ -63,6 +63,7 @@ public:
 	int getAmmo(){ return m_ammo; }
 	virtual ~Player(){}//empty virtual destructor
 	void incrAmmo();
+	virtual void decHealth();
 private:
 	int m_ammo;
 };
