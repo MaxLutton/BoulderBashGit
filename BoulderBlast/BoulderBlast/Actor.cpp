@@ -624,6 +624,13 @@ KleptoBot::~KleptoBot()
 		if (typeOfGoodie == "ammo")
 			getWorld()->getm_Actors()->push_back(new AmmoGoodie(getX(), getY(), getWorld()));
 	}
+	getWorld()->increaseScore(10);
+}
+
+AngryKleptoBot::~AngryKleptoBot()
+{
+	KleptoBot::~KleptoBot();
+	getWorld()->increaseScore(10);
 }
 
 GraphObject::Direction getRandomDirection()
@@ -752,7 +759,6 @@ void Robot::decHealth()
 	if (getHealth() <= 0)
 	{
 		world->playSound(SOUND_ROBOT_DIE);
-		world->increaseScore(10);
 		setIsAlive(false);
 	}
 }

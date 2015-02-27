@@ -142,7 +142,7 @@ void StudentWorld::updateDisplayText()
 	oss << " Level: " << setw(2) << getLevel();
 	oss.fill(' ');
 	oss << " Lives: " << setw(2) << getLives();
-	int health = (m_player->getHealth()) / 20;
+	double health = (m_player->getHealth()) / 20;
 	health = health * 100;
 	oss << " Health: " << setw(3) << health << "%";
 	oss << " Ammo: " << setw(3) << m_player->getAmmo();

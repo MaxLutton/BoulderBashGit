@@ -15,7 +15,7 @@ public:
 	void setIsAlive(bool toWhat){ m_isAlive = toWhat; }
 	int whatsThere(int x, int y);
 	virtual void decHealth(){} //does nothin since no health
-	virtual int getHealth() { return -1; }//does nothin since no health
+	virtual double getHealth() { return -1; }//does nothin since no health
 	virtual ~Actor(){}//empty virtual destructor
 	virtual void setHasGoodie(std::string type){}//needed for kleptobots
 	virtual bool holdingGoodie(){ return false; }
@@ -47,12 +47,12 @@ class healthyActor : public Actor
 public:
 	healthyActor(int imageID, int startX, int startY, Direction dir, StudentWorld* world, int hitpoints) : Actor(imageID, startX, startY, dir, world){ m_hitPoints = hitpoints; }
 	virtual void doSomething() = 0;
-	int getHealth(){ return m_hitPoints; }
+	double getHealth() { return m_hitPoints; }
 	virtual void decHealth(){ m_hitPoints -= 2; }
 	virtual ~healthyActor(){}
 	void RestoreHealth();
 private:
-	int m_hitPoints;
+	double m_hitPoints;
 };
 
 class Player : public healthyActor
@@ -120,6 +120,7 @@ class AngryKleptoBot :public KleptoBot
 public:
 	AngryKleptoBot(int x, int y, StudentWorld* world);
 	virtual void doSomething(){}
+	virtual ~AngryKleptoBot();
 };
 
 class SnarlBot : public Robot
