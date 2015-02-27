@@ -15,10 +15,6 @@ int Actor::whatsThere(int x, int y)
 	Actor* ap = m_world->getActor(x, y);
 	if (ap != nullptr)
 	{
-		//not necessary (remove later)
-		Player* pp = dynamic_cast<Player*>(ap);
-		if (pp != nullptr)
-			return 1; //player
 		Wall* wp = dynamic_cast<Wall*>(ap);
 		if (wp != nullptr)
 			return 2;//wall
@@ -181,6 +177,87 @@ void Robot::resetTicks()
 		ticks = 3;
 }
 
+bool Robot::shoot()
+{
+	Direction d = getDirection();
+	int px = getWorld()->getPlayer()->getX();
+	int py = getWorld()->getPlayer()->getY();
+	int x = getX();
+	int y = getY();
+	StudentWorld* world = getWorld();
+	if (d == left && y == py && x > px && shotNotBlocked(d))
+	{
+		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		return true;
+	}
+	else if (d == right && y == py && x < px && shotNotBlocked(d))
+	{
+		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		return true;
+	}
+	else if (d == up && x == px && y > py && shotNotBlocked(d))
+	{
+		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		return true;
+	}
+	else if (d == down && x == px && y < py && shotNotBlocked(d))
+	{
+		world->getm_Actors()->push_back(new Bullet(x, y, d, world));
+		return true;
+	}
+	return false;
+}
+
+bool Robot::shotNotBlocked(Direction d)
+{
+	int x = getX();
+	int y = getY();
+	int px = getWorld()->getPlayer()->getX();
+	int py = getWorld()->getPlayer()->getY();
+	switch (d)
+	{
+	case right:
+		while (x <= px)
+		{
+			if (whatsThere(x, y) == 1)
+				return true;
+			else if (whatsThere(x, y) != 0)
+				return false;
+				x++;
+		}
+		break;
+	case left:
+		while (x >= px)
+		{
+			if (whatsThere(x, y) == 1)
+				return true;
+			else if (whatsThere(x, y) != 0)
+				return false;
+			x--;
+		}
+		break;
+	case down:
+		while (y <= py)
+		{
+			if (whatsThere(x, y) == 1)
+				return true;
+			else if (whatsThere(x, y) != 0)
+				return false;
+			y++;
+		}
+		break;
+	case up:
+		while (y >= py)
+		{
+			if (whatsThere(x, y) == 1)
+				return true;
+			else if (whatsThere(x, y) != 0)
+				return false;
+			y--;
+		}
+	}
+}
+
 SnarlBot::SnarlBot(int x, int y, StudentWorld* world, Direction dir) : Robot(x, y, dir, world, IID_SNARLBOT, 10){}
 
 void SnarlBot::doSomething()
@@ -193,6 +270,13 @@ void SnarlBot::doSomething()
 		setTicks(t - 1);
 		return;
 	}
+	//try to shoot
+	else if (shoot())
+	{
+		resetTicks();
+		return;
+	}
+	//try to move
 	else
 	{
 		//not resting
@@ -226,18 +310,27 @@ Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Act
 
 void Bullet::doSomething()
 {
-	Direction x = getDirection();
-	int col = getX();
-	int row = getY();
-	int here = whatsThere(col, row);
-	int next;
-	if (here == 0 || here == 4) //starts on free space (or bullet) or hole
-		moveBullet();
-	if (here == 1 || here == 3) //boulder or player
-	{
-		setIsAlive(false);
-		getWorld()->getActor(col, row)->decHealth();
-	}
+	//Direction x = getDirection();
+	//int col = getX();
+	//int row = getY();
+	//int px = getWorld()->getPlayer()->getX();
+	//int py = getWorld()->getPlayer()->getY();
+	//int here = whatsThere(col, row);
+	//int next;
+	moveBullet();
+	//if (here == 0 || here == 4 && !playerOnMe(col, row)) //starts on free space (or bullet) or hole
+	//	moveBullet();
+	//if (here == 1 || here == 3) 
+	//{
+	//	setIsAlive(false);
+	//	getWorld()->getActor(col, row)->decHealth();
+	//}
+	//else if (playerOnMe(col, row))
+	//{
+	//	setIsAlive(false);
+	//	getWorld()->getPlayer()->decHealth();
+	//	getWorld()->playSound(SOUND_PLAYER_IMPACT);
+	//}
 }
 //if bullet starts on a free space, then see what is on its adjacent space, then move bullet there. If adjacent space isnt empty, kill bullet/
 //If item in adjacent space is a healthyActor, then decrement that actors health. 
@@ -254,7 +347,7 @@ void Bullet::moveBullet()
 		moveTo(col - 1, row);
 		if (next == 2 || next == 6) //ran into wall
 			setIsAlive(false);
-		if (next == 1 || next == 3 || next == 5) //hit a player or a boulder or bot
+		else if (next == 3 || next == 5) //hit a player or a boulder or bot
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col - 1, row);
@@ -262,13 +355,20 @@ void Bullet::moveBullet()
 			if (guy->getHealth() <= 0)
 				guy->setIsAlive(false);
 		}
+		else if (playerOnMe(col - 1, row))
+		{
+			Player* p = getWorld()->getPlayer();
+			p->decHealth();
+			if (p->getHealth() <= 0)
+				p->setIsAlive(false);
+		}
 			break;
 	case right:
 		next = whatsThere(col + 1, row);
 		moveTo(col + 1, row);
 		if (next == 2 || next == 6)
 			setIsAlive(false);
-		if (next == 1 || next == 3 || next == 5)
+		else if ( next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col + 1, row);
@@ -276,13 +376,20 @@ void Bullet::moveBullet()
 			if (guy->getHealth() == 0) //just shot it dead
 				guy->setIsAlive(false);
 		}
+		else if (playerOnMe(col + 1, row))
+		{
+			Player* p = getWorld()->getPlayer();
+			p->decHealth();
+			if (p->getHealth() <= 0)
+				p->setIsAlive(false);
+		}
 		break;
 	case up:
 		next = whatsThere(col, row + 1);
 		moveTo(col, row + 1);
 		if (next == 2 || next == 6)
 			setIsAlive(false);
-		if (next == 1 || next == 3 || next == 5)
+		else if (next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row+1);
@@ -290,19 +397,33 @@ void Bullet::moveBullet()
 			if (guy->getHealth() == 0) //just shot it dead
 				guy->setIsAlive(false);
 		}
+		else if (playerOnMe(col, row + 1))
+		{
+			Player* p = getWorld()->getPlayer();
+			p->decHealth();
+			if (p->getHealth() <= 0)
+				p->setIsAlive(false);
+		}
 		break;
 	case down:
-		next = whatsThere(col, row -1);
+		next = whatsThere(col, row - 1);
 		moveTo(col, row - 1);
 		if (next == 2 || next == 6)
 			setIsAlive(false);
-		if (next == 1 || next == 3 || next == 5)
+		else if (next == 3 || next == 5)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row - 1);
 			guy->decHealth();
 			if (guy->getHealth() == 0) //just shot it dead
 				guy->setIsAlive(false);
+		}
+		else if (playerOnMe(col, row - 1))
+		{
+			Player* p = getWorld()->getPlayer();
+			p->decHealth();
+			if (p->getHealth() <= 0)
+				p->setIsAlive(false);
 		}
 		break;
 	}
@@ -351,12 +472,11 @@ void Exit::doSomething()
 	}
 }
 
-bool PickupableItem::IsPlayerOnMe(StudentWorld* world)
+bool Actor::playerOnMe(int x, int y)
 {
-	int x = getX();
-	int y = getY();
-	int px = world->getPlayer()->getX();
-	int py = world->getPlayer()->getY();
+
+	int px = getWorld()->getPlayer()->getX();
+	int py = getWorld()->getPlayer()->getY();
 	return (x == px && y == py);
 }
 
@@ -391,7 +511,7 @@ void Goodie::doSomething()
 void ExtraLifeGoodie::doSomething()
 {
 	StudentWorld* world = getWorld();
-	if (IsPlayerOnMe(world))
+	if (playerOnMe(getX(), getY()))
 	{
 		world->increaseScore(1000);
 		world->playSound(SOUND_GOT_GOODIE);
@@ -405,7 +525,7 @@ void ExtraLifeGoodie::doSomething()
 void RestoreHealthGoodie::doSomething()
 {
 	StudentWorld* world = getWorld();
-	if (IsPlayerOnMe(world))
+	if (playerOnMe(getX(), getY()))
 	{
 		world->increaseScore(500);
 		world->playSound(SOUND_GOT_GOODIE);
@@ -419,7 +539,7 @@ void RestoreHealthGoodie::doSomething()
 void AmmoGoodie::doSomething()
 {
 	StudentWorld* world = getWorld();
-	if (IsPlayerOnMe(world))
+	if (playerOnMe(getX(), getY()))
 	{
 		world->increaseScore(100);
 		world->playSound(SOUND_GOT_GOODIE);
@@ -430,16 +550,6 @@ void AmmoGoodie::doSomething()
 		Goodie::doSomething();
 }
 
-bool Robot::sameCoordAsPlayer(int x, int y)
-{
-	bool col = false;
-	bool row = false;
-	if (x == getWorld()->getPlayer()->getX())
-		col = true;
-	if (y == getWorld()->getPlayer()->getY())
-		row = true;
-	return (col == true && row == true);
-}
 
 void KleptoBotFactory::doSomething()
 {
@@ -614,28 +724,28 @@ bool Robot::moveRobot()
 	{
 	case left:
 		next = whatsThere(col - 1, row);
-		if (next == 0 && !sameCoordAsPlayer(col - 1, row))
+		if (next == 0 && !playerOnMe(col,row))
 			moveTo(col - 1, row);
 		else
 			return false;
 		break;
 	case right:
 		next = whatsThere(col + 1, row);
-		if (next == 0 && !sameCoordAsPlayer(col+1, row))
+		if (next == 0 && !playerOnMe(col,row))
 			moveTo(col + 1, row);
 		else
 			return false;
 		break;
 	case up:
 		next = whatsThere(col, row + 1);
-		if (next == 0 && !sameCoordAsPlayer(col, row + 1))
+		if (next == 0 && !playerOnMe(col, row))
 			moveTo(col, row + 1);
 		else
 			return false;
 		break;
 	case down:
 		next = whatsThere(col, row - 1);
-		if (next == 0  && !sameCoordAsPlayer(col, row - 1))
+		if (next == 0 && !playerOnMe(col, row))
 			moveTo(col, row - 1);
 		else
 			return false;

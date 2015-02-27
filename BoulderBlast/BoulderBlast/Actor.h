@@ -19,6 +19,7 @@ public:
 	virtual ~Actor(){}//empty virtual destructor
 	virtual void setHasGoodie(std::string type){}//needed for kleptobots
 	virtual bool holdingGoodie(){ return false; }
+	bool playerOnMe(int x, int y);//used by bullets or pickupable items to see if on player
 private:
 	StudentWorld* m_world;
 	bool m_isAlive;
@@ -92,7 +93,8 @@ public:
 	int getTicks() { return ticks; }
 	void setTicks(int to) { ticks = to; }
 	void resetTicks();
-	bool sameCoordAsPlayer(int x, int y);
+	bool shoot();
+	bool shotNotBlocked(Direction d);
 private:
 	int ticks;
 };
@@ -105,7 +107,6 @@ public:
 	void setHasGoodie(std::string type);
 	void decHealth();
 	bool holdingGoodie();
-	void shoot(){}//not implemented yet!
 	virtual ~KleptoBot();
 private:
 	int distanceBeforeTurning;
@@ -147,7 +148,6 @@ class PickupableItem : public Actor
 {
 public:
 	PickupableItem(int x, int y, StudentWorld* world, int ID) : Actor(ID, x, y, none, world){}
-	bool IsPlayerOnMe(StudentWorld* world);//used by items to see if the player is at same coordinate as item
 };
 class Jewel : public PickupableItem
 {
