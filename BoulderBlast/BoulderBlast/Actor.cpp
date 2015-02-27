@@ -31,6 +31,9 @@ int Actor::whatsThere(int x, int y)
 		KleptoBot* kp = dynamic_cast<KleptoBot*>(ap);
 		if (kp != nullptr) //kleptobot
 			return 5;
+		KleptoBotFactory* fp = dynamic_cast<KleptoBotFactory*>(ap);
+		if(fp != nullptr)
+			return 6;
 	}
 	return 0; //space or bullet :D
 }
@@ -178,6 +181,47 @@ void Robot::resetTicks()
 		ticks = 3;
 }
 
+SnarlBot::SnarlBot(int x, int y, StudentWorld* world, Direction dir) : Robot(x, y, dir, world, IID_SNARLBOT, 10){}
+
+void SnarlBot::doSomething()
+{
+	int t = getTicks();
+	bool moved;
+	//should rest
+	if (t != 0)
+	{
+		setTicks(t - 1);
+		return;
+	}
+	else
+	{
+		//not resting
+		resetTicks();
+		bool moved = moveRobot();
+	    //if cant move, just change direction
+		if (moved == false)
+		{
+			Direction d = getDirection();
+			switch (d)
+			{
+			case right:
+				setDirection(left);
+				break;
+			case left:
+				setDirection(right);
+				break;
+			case up:
+				setDirection(down);
+				break;
+			case down:
+				setDirection(up);
+				break;
+			}
+		}
+
+	}
+}
+
 Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Actor(IID_BULLET, startX, startY, dir, world){}
 
 void Bullet::doSomething()
@@ -208,7 +252,7 @@ void Bullet::moveBullet()
 	case left:
 		next = whatsThere(col - 1, row);
 		moveTo(col - 1, row);
-		if (next == 2) //ran into wall
+		if (next == 2 || next == 6) //ran into wall
 			setIsAlive(false);
 		if (next == 1 || next == 3 || next == 5) //hit a player or a boulder or bot
 		{
@@ -222,7 +266,7 @@ void Bullet::moveBullet()
 	case right:
 		next = whatsThere(col + 1, row);
 		moveTo(col + 1, row);
-		if (next == 2)
+		if (next == 2 || next == 6)
 			setIsAlive(false);
 		if (next == 1 || next == 3 || next == 5)
 		{
@@ -236,7 +280,7 @@ void Bullet::moveBullet()
 	case up:
 		next = whatsThere(col, row + 1);
 		moveTo(col, row + 1);
-		if (next == 2)
+		if (next == 2 || next == 6)
 			setIsAlive(false);
 		if (next == 1 || next == 3 || next == 5)
 		{
@@ -250,7 +294,7 @@ void Bullet::moveBullet()
 	case down:
 		next = whatsThere(col, row -1);
 		moveTo(col, row - 1);
-		if (next == 2)
+		if (next == 2 || next == 6)
 			setIsAlive(false);
 		if (next == 1 || next == 3 || next == 5)
 		{
@@ -410,7 +454,7 @@ void KleptoBotFactory::doSomething()
 	for (int c = 1; c < 4; c++)
 		for (int r = 1; r < 4; r++)
 		{
-		if (x - c >= 0 )
+		if (x - c >= 0)
 		{
 			if (whatsThere(x - c, y) == 5)
 				count++;
@@ -447,24 +491,27 @@ void KleptoBotFactory::doSomething()
 	{
 		//1 in 50 chance of making new kleptobot
 		int r = rand() % 50;
-		if (r == 42)
+		if (r == 42 && m_angry == false)
 		{
 			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world, IID_KLEPTOBOT));
 			world->playSound(SOUND_ROBOT_BORN);
+		}//this is an angry kleptobot factory
+		else if (r == 42 && m_angry == true)
+		{
+			world->getm_Actors()->push_back(new AngryKleptoBot(getX(), getY(), world));
+			world->playSound(SOUND_ROBOT_BORN);
 		}
 	}
-		
 }
+
 
 KleptoBot::KleptoBot(int x, int y, StudentWorld* world, int ID) : Robot(x, y, right, world, ID, 5), hasGoodie(false)
 {
 	distanceBeforeTurning = rand() % 7 + 1;
-
 }
 
 AngryKleptoBot::AngryKleptoBot(int x, int y, StudentWorld* world) : KleptoBot(x, y, world, IID_ANGRY_KLEPTOBOT)
 {
-
 }
 
 KleptoBot::~KleptoBot()
@@ -519,7 +566,7 @@ void KleptoBot::doSomething()
 		if (distanceBeforeTurning != 0)
 		{
 			//if it moved, then sets notBlocked to true.
-			notBlocked = moveKlepto();
+			notBlocked = moveRobot();
 			distanceBeforeTurning--;
 		}
 		//either couldn't move or fulfilled distanceBeforeTurning
@@ -534,7 +581,7 @@ void KleptoBot::doSomething()
 			//IS THIS OK?
 			while (i < 5)
 			{
-				if (moveKlepto())
+				if (moveRobot())
 					break;
 				else if (i == 0)
 					setDirection(left);
@@ -554,7 +601,7 @@ void KleptoBot::doSomething()
 }
 
 //Tries to move KleptoBot in its direction. If its direction is blocked, then this returns false. Otherwise, returns true.
-bool KleptoBot::moveKlepto()
+bool Robot::moveRobot()
 {
 	int next = 0;
 	int col = getX();

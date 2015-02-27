@@ -88,6 +88,7 @@ class Robot : public healthyActor
 {
 public:
 	Robot(int x, int y, Direction dir, StudentWorld* world, int ID, int hp);
+	bool moveRobot();
 	int getTicks() { return ticks; }
 	void setTicks(int to) { ticks = to; }
 	void resetTicks();
@@ -102,9 +103,9 @@ public:
 	KleptoBot(int x, int y, StudentWorld* world, int ID);
 	virtual void doSomething();
 	void setHasGoodie(std::string type);
-	bool moveKlepto();
 	void decHealth();
 	bool holdingGoodie();
+	void shoot(){}//not implemented yet!
 	virtual ~KleptoBot();
 private:
 	int distanceBeforeTurning;
@@ -119,6 +120,14 @@ public:
 	AngryKleptoBot(int x, int y, StudentWorld* world);
 	virtual void doSomething(){}
 };
+
+class SnarlBot : public Robot
+{
+public:
+	SnarlBot(int x, int y, StudentWorld* world, Direction dir);
+	virtual void doSomething();
+};
+
 
 class Hole : public Actor
 {

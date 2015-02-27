@@ -57,19 +57,23 @@ int StudentWorld::init()
 			m_actors.push_back(new Exit(x, y, this));
 		if (a == 7)//extra life goodie
 			m_actors.push_back(new ExtraLifeGoodie(x, y, this));
-		if (a == 8)
+		if (a == 8)//restore health goodie
 			m_actors.push_back(new RestoreHealthGoodie(x, y, this));
-		if (a == 9)
+		if (a == 9)//ammmo goodie
 			m_actors.push_back(new AmmoGoodie(x, y, this));
-		if (a == 10)
+		if (a == 10)//regular kleptobot factory
 			m_actors.push_back(new KleptoBotFactory(false, x, y, this));
-		if (a == 11)
+		if (a == 11)//angry kleptobot factory
 			m_actors.push_back(new KleptoBotFactory(true, x, y, this));
+		if (a == 12)
+			m_actors.push_back(new SnarlBot(x, y, this, GraphObject::Direction::right));
+		if (a == 13)
+			m_actors.push_back(new SnarlBot(x, y, this, GraphObject::Direction::down));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
 		}
 	return GWSTATUS_CONTINUE_GAME;
-
+	
 }
 int StudentWorld::move()
 {
@@ -189,6 +193,10 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 		return 10;
 	if (item == Level::angry_kleptobot_factory)
 		return 11;
+	if (item == Level::horiz_snarlbot)
+		return 12;
+	if (item == Level::vert_snarlbot)
+		return 13;
 	else //will be for blank spaces later
 		return 0;
 }
@@ -203,9 +211,8 @@ Actor* StudentWorld::getActor(int x, int y) //get pointer to actor at coordinate
 		{	
 			PickupableItem* pp = dynamic_cast<PickupableItem*>(*it);
 			Exit* xp = dynamic_cast<Exit*>(*it);
-			KleptoBotFactory* kf = dynamic_cast<KleptoBotFactory*>(*it);
-			if (pp == nullptr && xp == nullptr && kf == nullptr)
-				return *it; //not the jewel or exit
+			if (pp == nullptr && xp == nullptr )
+				return *it; //not the jewel or goodie or exit
 			it++; ///was a jewel or exit
 		}
 		else
