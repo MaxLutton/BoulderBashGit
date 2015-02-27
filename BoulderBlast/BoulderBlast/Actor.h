@@ -94,6 +94,7 @@ public:
 	void setTicks(int to) { ticks = to; }
 	void resetTicks();
 	bool shoot();
+	virtual void decHealth();
 	bool shotNotBlocked(Direction d);
 private:
 	int ticks;
@@ -105,7 +106,6 @@ public:
 	KleptoBot(int x, int y, StudentWorld* world, int ID);
 	virtual void doSomething();
 	void setHasGoodie(std::string type);
-	void decHealth();
 	bool holdingGoodie();
 	virtual ~KleptoBot();
 private:
@@ -127,6 +127,7 @@ class SnarlBot : public Robot
 public:
 	SnarlBot(int x, int y, StudentWorld* world, Direction dir);
 	virtual void doSomething();
+	virtual ~SnarlBot();
 };
 
 

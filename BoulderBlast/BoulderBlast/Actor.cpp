@@ -10,6 +10,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, Stud
 	m_isAlive = true;
 	setVisible(true);
 }
+
 int Actor::whatsThere(int x, int y)
 {
 	Actor* ap = m_world->getActor(x, y);
@@ -30,6 +31,9 @@ int Actor::whatsThere(int x, int y)
 		KleptoBotFactory* fp = dynamic_cast<KleptoBotFactory*>(ap);
 		if(fp != nullptr)
 			return 6;
+		SnarlBot* sp = dynamic_cast<SnarlBot*>(ap);
+		if (sp != nullptr)
+			return 7;
 	}
 	return 0; //space or bullet :D
 }
@@ -219,9 +223,9 @@ bool Robot::shotNotBlocked(Direction d)
 	case right:
 		while (x <= px)
 		{
-			if (whatsThere(x, y) == 1)
+			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y) != 0)
+			else if (whatsThere(x + 1, y) !=7)
 				return false;
 				x++;
 		}
@@ -229,9 +233,9 @@ bool Robot::shotNotBlocked(Direction d)
 	case left:
 		while (x >= px)
 		{
-			if (whatsThere(x, y) == 1)
+			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y) != 0)
+			else if (whatsThere(x - 1, y) != 0)
 				return false;
 			x--;
 		}
@@ -239,9 +243,9 @@ bool Robot::shotNotBlocked(Direction d)
 	case down:
 		while (y <= py)
 		{
-			if (whatsThere(x, y) == 1)
+			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y) != 0)
+			else if (whatsThere(x, y + 1) != 0)
 				return false;
 			y++;
 		}
@@ -249,9 +253,9 @@ bool Robot::shotNotBlocked(Direction d)
 	case up:
 		while (y >= py)
 		{
-			if (whatsThere(x, y) == 1)
+			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y) != 0)
+			else if (whatsThere(x, y - 1) != 0)
 				return false;
 			y--;
 		}
@@ -259,6 +263,10 @@ bool Robot::shotNotBlocked(Direction d)
 }
 
 SnarlBot::SnarlBot(int x, int y, StudentWorld* world, Direction dir) : Robot(x, y, dir, world, IID_SNARLBOT, 10){}
+SnarlBot::~SnarlBot()
+{
+	getWorld()->increaseScore(100);
+}
 
 void SnarlBot::doSomething()
 {
@@ -310,27 +318,8 @@ Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Act
 
 void Bullet::doSomething()
 {
-	//Direction x = getDirection();
-	//int col = getX();
-	//int row = getY();
-	//int px = getWorld()->getPlayer()->getX();
-	//int py = getWorld()->getPlayer()->getY();
-	//int here = whatsThere(col, row);
-	//int next;
+	//lolz stoopid idiot wrote the same code twice
 	moveBullet();
-	//if (here == 0 || here == 4 && !playerOnMe(col, row)) //starts on free space (or bullet) or hole
-	//	moveBullet();
-	//if (here == 1 || here == 3) 
-	//{
-	//	setIsAlive(false);
-	//	getWorld()->getActor(col, row)->decHealth();
-	//}
-	//else if (playerOnMe(col, row))
-	//{
-	//	setIsAlive(false);
-	//	getWorld()->getPlayer()->decHealth();
-	//	getWorld()->playSound(SOUND_PLAYER_IMPACT);
-	//}
 }
 //if bullet starts on a free space, then see what is on its adjacent space, then move bullet there. If adjacent space isnt empty, kill bullet/
 //If item in adjacent space is a healthyActor, then decrement that actors health. 
@@ -347,7 +336,7 @@ void Bullet::moveBullet()
 		moveTo(col - 1, row);
 		if (next == 2 || next == 6) //ran into wall
 			setIsAlive(false);
-		else if (next == 3 || next == 5) //hit a player or a boulder or bot
+		else if (next == 3 || next == 5 || next == 7) //hit a player or a boulder or bot
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col - 1, row);
@@ -368,7 +357,7 @@ void Bullet::moveBullet()
 		moveTo(col + 1, row);
 		if (next == 2 || next == 6)
 			setIsAlive(false);
-		else if ( next == 3 || next == 5)
+		else if (next == 3 || next == 5 || next == 7)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col + 1, row);
@@ -389,7 +378,7 @@ void Bullet::moveBullet()
 		moveTo(col, row + 1);
 		if (next == 2 || next == 6)
 			setIsAlive(false);
-		else if (next == 3 || next == 5)
+		else if (next == 3 || next == 5 || next == 7)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row+1);
@@ -408,7 +397,7 @@ void Bullet::moveBullet()
 	case down:
 		next = whatsThere(col, row - 1);
 		moveTo(col, row - 1);
-		if (next == 2 || next == 6)
+		if (next == 2 || next == 6 || next == 7)
 			setIsAlive(false);
 		else if (next == 3 || next == 5)
 		{
@@ -724,28 +713,28 @@ bool Robot::moveRobot()
 	{
 	case left:
 		next = whatsThere(col - 1, row);
-		if (next == 0 && !playerOnMe(col,row))
+		if (next == 0 && !playerOnMe(col-1,row))
 			moveTo(col - 1, row);
 		else
 			return false;
 		break;
 	case right:
 		next = whatsThere(col + 1, row);
-		if (next == 0 && !playerOnMe(col,row))
+		if (next == 0 && !playerOnMe(col+1,row))
 			moveTo(col + 1, row);
 		else
 			return false;
 		break;
 	case up:
 		next = whatsThere(col, row + 1);
-		if (next == 0 && !playerOnMe(col, row))
+		if (next == 0 && !playerOnMe(col, row+1))
 			moveTo(col, row + 1);
 		else
 			return false;
 		break;
 	case down:
 		next = whatsThere(col, row - 1);
-		if (next == 0 && !playerOnMe(col, row))
+		if (next == 0 && !playerOnMe(col, row-1))
 			moveTo(col, row - 1);
 		else
 			return false;
@@ -754,7 +743,7 @@ bool Robot::moveRobot()
 	return true;
 }
 
-void KleptoBot::decHealth()
+void Robot::decHealth()
 {
 	StudentWorld* world = getWorld();
 	healthyActor::decHealth();
