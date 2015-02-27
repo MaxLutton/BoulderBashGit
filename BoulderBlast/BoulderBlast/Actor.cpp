@@ -2,6 +2,8 @@
 #include "StudentWorld.h"
 #include <cstdlib>
 #include "Level.h"
+#include <algorithm>
+#include <functional>
 
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
@@ -236,7 +238,7 @@ bool Robot::shotNotBlocked(Direction d)
 		{
 			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x + 1, y) != 0)
+			else if (whatsThere(x + 1, y) != 0 && whatsThere(x + 1, y) != 4)
 				return false;
 				x++;
 		}
@@ -246,7 +248,7 @@ bool Robot::shotNotBlocked(Direction d)
 		{
 			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x - 1, y) != 0)
+			else if (whatsThere(x - 1, y) != 0 && whatsThere(x - 1, y) != 4)
 				return false;
 			x--;
 		}
@@ -256,7 +258,7 @@ bool Robot::shotNotBlocked(Direction d)
 		{
 			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y + 1) != 0)
+			else if (whatsThere(x, y + 1) != 0 && whatsThere(x, y + 1) != 4)
 				return false;
 			y++;
 		}
@@ -266,7 +268,7 @@ bool Robot::shotNotBlocked(Direction d)
 		{
 			if (playerOnMe(x,y))
 				return true;
-			else if (whatsThere(x, y - 1) != 0)
+			else if (whatsThere(x, y - 1) != 0 && whatsThere(x, y - 1) != 4)
 				return false;
 			y--;
 		}
@@ -532,55 +534,55 @@ void KleptoBotFactory::doSomething()
 	//don't add a kleptoBot if there is one on the factory's square
 	if (whatsThere(x, y) == 5)
 		return;
-	//can I make this more efficient? Is pretty awful right now...
-	for (int c = 1; c < 4; c++)
-		for (int r = 1; r < 4; r++)
-		{
-		if (x - c >= 0)
-		{
-			if (whatsThere(x - c, y) == 5)
-				count++;
-			if (y - r >= 0)
-				if (whatsThere(x - c, y - r) == 5)
-					count++;
-		}
-		if (x + c < VIEW_WIDTH)
-		{
-			if (whatsThere(x + c, y) == 5)
-				count++;
-			if (y + r < VIEW_HEIGHT)
-				if (whatsThere(x + c, y + r) == 5)
-					count++;
-		}
-		if (y - r >= 0)
-		{
-			if (whatsThere(x, y - r) == 5)
-				count++;
-			if (x + c < VIEW_WIDTH)
-				if (whatsThere(x + c, y - r) == 5)
-					count++;
-		}
-		if (y + r < VIEW_HEIGHT)
-		{
-			if (whatsThere(x, y + r) == 5)
-				count++;
-			if (x - c >= 0)
-				if (whatsThere(x - c, y + r) == 5)
-					count++;
-		}
-		}
-	if (count < 3)
+	////can I make this more efficient? Is pretty awful right now...
+	//for (int c = 1; c < 4; c++)
+	//	for (int r = 1; r < 4; r++)
+	//	{
+	//	if (x - c >= 0)
+	//	{
+	//		if (whatsThere(x - c, y) == 5)
+	//			count++;
+	//		if (y - r >= 0)
+	//			if (whatsThere(x - c, y - r) == 5)
+	//				count++;
+	//	}
+	//	if (x + c < VIEW_WIDTH)
+	//	{
+	//		if (whatsThere(x + c, y) == 5)
+	//			count++;
+	//		if (y + r < VIEW_HEIGHT)
+	//			if (whatsThere(x + c, y + r) == 5)
+	//				count++;
+	//	}
+	//	if (y - r >= 0)
+	//	{
+	//		if (whatsThere(x, y - r) == 5)
+	//			count++;
+	//		if (x + c < VIEW_WIDTH)
+	//			if (whatsThere(x + c, y - r) == 5)
+	//				count++;
+	//	}
+	//	if (y + r < VIEW_HEIGHT)
+	//	{
+	//		if (whatsThere(x, y + r) == 5)
+	//			count++;
+	//		if (x - c >= 0)
+	//			if (whatsThere(x - c, y + r) == 5)
+	//				count++;
+	//	}
+	//	}
+	if (!tooManyKleptos(x, y))
 	{
 		//1 in 50 chance of making new kleptobot
 		int r = rand() % 50;
 		if (r == 42 && m_angry == false)
 		{
-			world->getm_Actors()->push_back(new KleptoBot(getX(), getY(), world, IID_KLEPTOBOT, 5));
+			world->getm_Actors()->push_back(new KleptoBot(x, y, world, IID_KLEPTOBOT, 5));
 			world->playSound(SOUND_ROBOT_BORN);
 		}//this is an angry kleptobot factory
 		else if (r == 42 && m_angry == true)
 		{
-			world->getm_Actors()->push_back(new AngryKleptoBot(getX(), getY(), world));
+			world->getm_Actors()->push_back(new AngryKleptoBot(x, y, world));
 			world->playSound(SOUND_ROBOT_BORN);
 		}
 	}
@@ -768,6 +770,8 @@ void AngryKleptoBot::doSomething()
 		setTicks(t - 1);
 		return;
 	}
+	else if (grabGoodie())
+		return;
 	else if (shoot())
 	{
 		resetTicks();
@@ -805,4 +809,48 @@ bool KleptoBot::grabGoodie()
 		}
 	}
 	return false;
+}
+
+bool KleptoBotFactory::isRobotInArea(Actor* act)
+{
+	int x = getX();
+	int y = getY();
+	KleptoBot* kp = dynamic_cast<KleptoBot*>(act);
+	if (kp != nullptr)
+	{
+		int rx = act->getX();
+		int ry = act->getY();
+		int ux = x;
+		for (int k = 0; k < 3 && ux < VIEW_WIDTH; k++)
+			ux++;
+		int uy = y;
+		for (int k = 0; k < 3 && uy < VIEW_HEIGHT; k++)
+			uy++;
+		int lx = x;
+		for (int k = 0; k < 3 && lx > 0; k++)
+			lx--;
+		int ly = y;
+		for (int k = 0; k < 3 && ly > 0; k++)
+			ly--;
+		if (rx <= ux && rx >= lx && ry <= uy && ry >= ly)
+			return true;
+	}
+	return false;
+}
+bool KleptoBotFactory::tooManyKleptos(int x, int y)
+{
+	std::vector<Actor*>* point = getWorld()->getm_Actors();
+	std::vector<Actor*>::iterator one = std::find_if(point->begin(), point->end(), std::bind1st(std::mem_fun(&KleptoBotFactory::isRobotInArea),this));
+	if (one != point->end())
+	{
+		std::vector<Actor*>::iterator two = std::find_if(++one, point->end(), std::bind1st(std::mem_fun(&KleptoBotFactory::isRobotInArea), this));
+		if (two != point->end())
+		{
+			std::vector<Actor*>::iterator three = std::find_if(++two, point->end(), std::bind1st(std::mem_fun(&KleptoBotFactory::isRobotInArea), this));
+			if (three != point->end())
+				return true;
+		}
+	}
+	else
+		return false;
 }

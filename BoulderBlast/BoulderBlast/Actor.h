@@ -81,6 +81,8 @@ class KleptoBotFactory : public Actor
 public:
 	KleptoBotFactory(bool angry, int x, int y, StudentWorld* world) : Actor(IID_ROBOT_FACTORY, x, y, none, world), m_angry(angry) {}
 	virtual void doSomething();
+	bool isRobotInArea(Actor* act);
+	bool tooManyKleptos(int x, int y);
 private:
 	bool m_angry; //type of factory
 };

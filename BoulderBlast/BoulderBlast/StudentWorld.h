@@ -36,6 +36,7 @@ public:
 	void setLevelCompleted(bool to);
 	int levelNumber(){ return getLevel(); } //meh maybe remove later
 	Goodie* getGoodie(int x, int y);
+	bool tooManyKleptos(int x, int y);
 
 private:
 	std::vector<Actor*> m_actors;
