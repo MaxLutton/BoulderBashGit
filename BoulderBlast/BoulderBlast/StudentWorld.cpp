@@ -72,6 +72,8 @@ int StudentWorld::init()
 			m_actors.push_back(new SnarlBot(x, y, this, GraphObject::Direction::down));
 		if (a == -1)
 			return GWSTATUS_LEVEL_ERROR;
+		if (a == 100)
+			return GWSTATUS_PLAYER_WON;
 		}
 	return GWSTATUS_CONTINUE_GAME;
 	
@@ -162,12 +164,13 @@ int StudentWorld::loadLevelObject(unsigned int curLevel, int x, int y)
 	else if (curLevel < 10)
 		a = "level0" + to_string(curLevel);
 	else
-		a = "level" + curLevel;
+		a = "level" + to_string(curLevel);
 	string theLevel = a + ".dat";
 	Level	lev(assetDirectory());
 	Level::LoadResult result = lev.loadLevel(theLevel);
-	if (result == Level::load_fail_file_not_found ||
-		result == Level::load_fail_bad_format)
+	if (result == Level::load_fail_file_not_found || curLevel > 99)
+		return 100;
+	if (result == Level::load_fail_bad_format)
 		return -1; //	something	bad	happened!
 	//	otherwise	the	load	was	successful	and	you	can	access	the
 	//	contents	of	the	level – here’s	an	example	
