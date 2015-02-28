@@ -14,6 +14,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, Stud
 	setVisible(true);
 }
 
+//return an integer referring the actor type at the given position
 int Actor::whatsThere(int x, int y)
 {
 	Actor* ap = m_world->getActor(x, y);
@@ -61,6 +62,8 @@ void Player::decHealth()
 	healthyActor::decHealth();
 	getWorld()->playSound(SOUND_PLAYER_IMPACT);
 }
+
+
 
 void Player::doSomething()
 {
@@ -254,16 +257,6 @@ bool Robot::shotNotBlocked(Direction d)
 		}
 		break;
 	case down:
-		while (y <= py)
-		{
-			if (playerOnMe(x,y))
-				return true;
-			else if (whatsThere(x, y + 1) != 0 && whatsThere(x, y + 1) != 4)
-				return false;
-			y++;
-		}
-		break;
-	case up:
 		while (y >= py)
 		{
 			if (playerOnMe(x,y))
@@ -271,6 +264,16 @@ bool Robot::shotNotBlocked(Direction d)
 			else if (whatsThere(x, y - 1) != 0 && whatsThere(x, y - 1) != 4)
 				return false;
 			y--;
+		}
+		break;
+	case up:
+		while (y <= py)
+		{
+			if (playerOnMe(x,y))
+				return true;
+			else if (whatsThere(x, y + 1) != 0 && whatsThere(x, y + 1) != 4)
+				return false;
+			y++;
 		}
 	}
 }
@@ -329,14 +332,9 @@ void SnarlBot::doSomething()
 
 Bullet::Bullet(int startX, int startY, Direction dir, StudentWorld* world) : Actor(IID_BULLET, startX, startY, dir, world){}
 
-void Bullet::doSomething()
-{
-	//lolz stoopid idiot wrote the same code twice
-	moveBullet();
-}
 //if bullet starts on a free space, then see what is on its adjacent space, then move bullet there. If adjacent space isnt empty, kill bullet/
 //If item in adjacent space is a healthyActor, then decrement that actors health. 
-void Bullet::moveBullet()
+void Bullet::doSomething()
 {
 	Direction x = getDirection();
 	int col = getX();
@@ -349,7 +347,7 @@ void Bullet::moveBullet()
 		moveTo(col - 1, row);
 		if (next == 2 || next == 6) //ran into wall
 			setIsAlive(false);
-		else if (next == 3 || next == 5 || next == 7) //hit a player or a boulder or bot
+		else if (next == 3 || next == 5 || next == 7) // boulder or bot
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col - 1, row);
@@ -363,9 +361,12 @@ void Bullet::moveBullet()
 			p->decHealth();
 			setIsAlive(false);
 			if (p->getHealth() <= 0)
+			{
 				p->setIsAlive(false);
+				getWorld()->playSound(SOUND_PLAYER_DIE);
+			}
 		}
-			break;
+		break;
 	case right:
 		next = whatsThere(col + 1, row);
 		moveTo(col + 1, row);
@@ -385,7 +386,10 @@ void Bullet::moveBullet()
 			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
+			{
 				p->setIsAlive(false);
+				getWorld()->playSound(SOUND_PLAYER_DIE);
+			}
 		}
 		break;
 	case up:
@@ -396,7 +400,7 @@ void Bullet::moveBullet()
 		else if (next == 3 || next == 5 || next == 7)
 		{
 			setIsAlive(false);
-			Actor* guy = getWorld()->getActor(col, row+1);
+			Actor* guy = getWorld()->getActor(col, row + 1);
 			guy->decHealth();
 			if (guy->getHealth() == 0) //just shot it dead
 				guy->setIsAlive(false);
@@ -407,15 +411,18 @@ void Bullet::moveBullet()
 			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
+			{
 				p->setIsAlive(false);
+				getWorld()->playSound(SOUND_PLAYER_DIE);
+			}
 		}
 		break;
 	case down:
 		next = whatsThere(col, row - 1);
 		moveTo(col, row - 1);
-		if (next == 2 || next == 6 || next == 7)
+		if (next == 2 || next == 6)
 			setIsAlive(false);
-		else if (next == 3 || next == 5)
+		else if (next == 3 || next == 5 || next == 7)
 		{
 			setIsAlive(false);
 			Actor* guy = getWorld()->getActor(col, row - 1);
@@ -429,7 +436,10 @@ void Bullet::moveBullet()
 			setIsAlive(false);
 			p->decHealth();
 			if (p->getHealth() <= 0)
+			{
 				p->setIsAlive(false);
+				getWorld()->playSound(SOUND_PLAYER_DIE);
+			}
 		}
 		break;
 	}
@@ -534,43 +544,6 @@ void KleptoBotFactory::doSomething()
 	//don't add a kleptoBot if there is one on the factory's square
 	if (whatsThere(x, y) == 5)
 		return;
-	////can I make this more efficient? Is pretty awful right now...
-	//for (int c = 1; c < 4; c++)
-	//	for (int r = 1; r < 4; r++)
-	//	{
-	//	if (x - c >= 0)
-	//	{
-	//		if (whatsThere(x - c, y) == 5)
-	//			count++;
-	//		if (y - r >= 0)
-	//			if (whatsThere(x - c, y - r) == 5)
-	//				count++;
-	//	}
-	//	if (x + c < VIEW_WIDTH)
-	//	{
-	//		if (whatsThere(x + c, y) == 5)
-	//			count++;
-	//		if (y + r < VIEW_HEIGHT)
-	//			if (whatsThere(x + c, y + r) == 5)
-	//				count++;
-	//	}
-	//	if (y - r >= 0)
-	//	{
-	//		if (whatsThere(x, y - r) == 5)
-	//			count++;
-	//		if (x + c < VIEW_WIDTH)
-	//			if (whatsThere(x + c, y - r) == 5)
-	//				count++;
-	//	}
-	//	if (y + r < VIEW_HEIGHT)
-	//	{
-	//		if (whatsThere(x, y + r) == 5)
-	//			count++;
-	//		if (x - c >= 0)
-	//			if (whatsThere(x - c, y + r) == 5)
-	//				count++;
-	//	}
-	//	}
 	if (!tooManyKleptos(x, y))
 	{
 		//1 in 50 chance of making new kleptobot
